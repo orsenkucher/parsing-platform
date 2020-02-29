@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 
@@ -8,8 +9,9 @@ import (
 )
 
 func main() {
-	fmt.Println("go works")
-	key := encio.NewEncIO("password")
+	var s = flag.String("s", "", "provide encio password")
+	flag.Parse()
+	key := encio.NewEncIO(*s)
 	cfg, err := key.GetConfig("bot.json")
 	if err != nil {
 		log.Fatalln(err)
