@@ -3,6 +3,7 @@ package bot
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/orsenkucher/nothing/encio"
 
@@ -10,9 +11,8 @@ import (
 )
 
 type Bot struct {
-	API   *tgbotapi.BotAPI
-	cfg   encio.Config
-	Users []int64
+	api *tgbotapi.BotAPI
+	cfg encio.Config
 }
 
 func NewBot(key encio.EncIO) *Bot {
@@ -28,15 +28,15 @@ func NewBot(key encio.EncIO) *Bot {
 
 func (b *Bot) initAPI() {
 	var err error
-	b.API, err = tgbotapi.NewBotAPI(b.cfg["token"].(string))
+	b.api, err = tgbotapi.NewBotAPI(b.cfg["token"].(string))
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	b.API.Debug = false
-	log.Printf("Authorized on account %s\n", b.API.Self.UserName)
+	b.api.Debug = false
+	log.Printf("Authorized on account %s\n", b.api.Self.UserName)
 
-	_, err = b.API.RemoveWebhook()
+	_, err = b.api.RemoveWebhook()
 	if err != nil {
 		log.Println("Cant remove webhook")
 	}
@@ -44,4 +44,20 @@ func (b *Bot) initAPI() {
 
 func (b *Bot) Listen() {
 
+}
+
+func (b *Bot) SpreadMessage(users []int64, msg string) {
+	log.Printf("Sending message to %v users\n", len(users))
+	for _, u := range users {
+		time.Sleep(100 * time.Millisecond)
+
+		log.Printf("Deleting previous msg for %v\n", u)
+
+		log.Printf("Sending to %v\n", u)
+		tgmsg := tgbotapi.NewMessage(u, msg)
+		_, err := b.api.Send(tgmsg)
+		if err != nil {
+			log.Println(err)
+		}
+	}
 }
