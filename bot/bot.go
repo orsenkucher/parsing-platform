@@ -1,4 +1,4 @@
-package ppdrop
+package bot
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ type Bot struct {
 }
 
 func NewBot(key encio.EncIO) *Bot {
-	cfg, err := key.GetConfig("ppdrop/bot.json")
+	cfg, err := key.GetConfig("bot/bot.json")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -25,6 +25,7 @@ func NewBot(key encio.EncIO) *Bot {
 	b.initAPI()
 	return &b
 }
+
 func (b *Bot) initAPI() {
 	var err error
 	b.API, err = tgbotapi.NewBotAPI(b.cfg["token"].(string))
