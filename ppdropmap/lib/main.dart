@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:google_maps/google_maps.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 void main() {
@@ -34,14 +34,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _onPressed() async {
     // setState(() {});
-    // if (await canLaunch(_link)) {
-    //   await launch(_link);
-    // } else {
-    //   throw 'Could not launch $_link';
-    // }
+    if (await canLaunch(_link)) {
+      await launch(_link);
+    } else {
+      throw 'Could not launch $_link';
+    }
     // SystemChannels.platform.invokeMethod('SystemNavigator.pop');
     try {
-      SystemNavigator.pop();
+      // SystemNavigator.pop();
+      // exit(0);
     } on dynamic catch (err) {
       print(err);
     }
