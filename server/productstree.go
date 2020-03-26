@@ -1,16 +1,14 @@
-package data
+package server
 
 import (
 	"fmt"
 	"io/ioutil"
 	"strconv"
 	"strings"
-
-	"github.com/orsenkucher/parsing-platform/server"
 )
 
 type ProdTree struct {
-	Product server.Product
+	Product Product
 	Next    map[string]*ProdTree
 	Prev    *ProdTree
 }
@@ -31,7 +29,7 @@ func (tree *ProdTree) AddProduct(line *string) {
 	for j := 0; j < len(nodes)-1; j++ {
 		_, ok := tree.Next[nodes[j]]
 		if !ok {
-			tree.Next[nodes[j]] = &ProdTree{Product: server.Product{Name: nodes[j]}, Prev: tree, Next: make(map[string]*ProdTree)}
+			tree.Next[nodes[j]] = &ProdTree{Product: Product{Name: nodes[j]}, Prev: tree, Next: make(map[string]*ProdTree)}
 		}
 		tree = tree.Next[nodes[j]]
 	}
@@ -52,4 +50,10 @@ func (tree *ProdTree) Print(s string) {
 	for _, node := range tree.Next {
 		node.Print(s + "\t")
 	}
+}
+
+func GenerateTree() *ProdTree {
+	tree := &ProdTree{Product: Product{Name: "root"}, Prev: nil, Next: make(map[string]*ProdTree)}
+	tree.AddFile("./data/Products.csv")
+	return tree
 }

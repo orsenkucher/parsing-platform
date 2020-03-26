@@ -11,7 +11,7 @@ type Product struct {
 }
 
 type Purchase struct {
-	Product *Product
+	Product *ProdTree
 	Count   int
 }
 
@@ -34,5 +34,5 @@ func (q *Query) ToString() string {
 }
 
 func (p *Purchase) ToString() string {
-	return p.Product.Name + " " + string(p.Count) + "\n"
+	return p.Product.Product.Name + " " + string(p.Count) + "\n"
 }

@@ -1,9 +1,8 @@
-package bot
+package server
 
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/orsenkucher/nothing/encio"
 
@@ -14,11 +13,11 @@ type Bot struct {
 	api      *tgbotapi.BotAPI
 	cfg      encio.Config
 	UsersMsg map[int64]int
-	//Updates  *chan server.Update
+	Updates  chan Update
 }
 
 func NewBot(key encio.EncIO) *Bot {
-	cfg, err := key.GetConfig("bot/bot.json")
+	cfg, err := key.GetConfig("server/bot.json")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -66,10 +65,11 @@ func (b *Bot) Listen() {
 					log.Println(err)
 				}
 			}
+			b.NewLocation(update.Message.Chat.ID, update.Message.Text)
 
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+			// msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 
-			b.UpdateMsg(msg)
+			// b.UpdateMsg(msg)
 			// if err != nil {
 			// 	fmt.Println(err)
 			// }
@@ -80,25 +80,19 @@ func (b *Bot) Listen() {
 	}
 }
 
-func (b *Bot) SpreadMessage(users []int64, msg string) {
-	log.Printf("Sending message to %v users\n", len(users))
-	for _, u := range users {
-		time.Sleep(100 * time.Millisecond)
-
-		log.Printf("Sending to %v\n", u)
-		tgmsg := tgbotapi.NewMessage(u, msg)
-		_, err := b.api.Send(tgmsg)
+func (b *Bot) UpdateMsg(msg tgbotapi.MessageConfig) {
+	prevID, ok := b.UsersMsg[msg.ChatID]
+	if ok {
+		updatemsg := tgbotapi.NewEditMessageText(msg.ChatID, prevID, msg.Text)
+		_, err := b.api.Send(updatemsg)
 		if err != nil {
-			log.Println(err)
+			fmt.Print(err)
+		}
+	} else {
+		msgtg, err := b.api.Send(msg)
+		b.UsersMsg[msg.ChatID] = msgtg.MessageID
+		if err != nil {
+			fmt.Print(err)
 		}
 	}
-}
-
-func (b *Bot) SendMessage(u int64, msg string) {
-	//log.Printf("Sending message to %v user\n", u)
-	time.Sleep(100 * time.Millisecond)
-
-	log.Printf("Sending to %v\n", u)
-	tgmsg := tgbotapi.NewMessage(u, msg)
-	b.UpdateMsg(tgmsg)
 }

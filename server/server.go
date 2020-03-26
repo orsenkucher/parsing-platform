@@ -2,31 +2,33 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"github.com/orsenkucher/parsing-platform/bot"
 )
 
 type Server struct {
-	Bot     *bot.Bot
+	Bot     *Bot
 	Queries map[int64]*Query
 	Updates chan Update
+	Tree    *ProdTree
 }
 
 func (s *Server) Listen() {
 	for {
+		fmt.Print("wait")
 		upd := <-s.Updates
 		upd.Update(s)
 	}
 }
 
-func StartServer(bot *bot.Bot) {
-	s := Server{Bot: bot, Queries: make(map[int64]*Query), Updates: make(chan Update)}
+func StartServer(bot *Bot) {
+	s := Server{Bot: bot, Queries: make(map[int64]*Query), Updates: make(chan Update), Tree: GenerateTree()}
+	s.Bot.Updates = s.Updates
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	http.HandleFunc("/", s.GetLocation)
