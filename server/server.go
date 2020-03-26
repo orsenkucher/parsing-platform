@@ -14,7 +14,7 @@ import (
 
 type Server struct {
 	Bot     *bot.Bot
-	Queries map[int64]Query
+	Queries map[int64]*Query
 	Updates chan Update
 }
 
@@ -26,7 +26,7 @@ func (s *Server) Listen() {
 }
 
 func StartServer(bot *bot.Bot) {
-	s := Server{Bot: bot, Queries: make(map[int64]Query), Updates: make(chan Update)}
+	s := Server{Bot: bot, Queries: make(map[int64]*Query), Updates: make(chan Update)}
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	http.HandleFunc("/", s.GetLocation)
@@ -34,6 +34,7 @@ func StartServer(bot *bot.Bot) {
 		Addr:    ":9094",
 		Handler: nil, // use default mux
 	}
+	go s.Listen()
 	go func() {
 		if err := hsrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)

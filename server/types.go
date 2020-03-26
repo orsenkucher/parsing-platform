@@ -1,21 +1,38 @@
 package server
 
-type Location struct {
-	X int
-	Y int
-}
+import (
+	"fmt"
+	"strconv"
+)
 
 type Product struct {
-	Price int
+	Name  string
+	Price float64
 }
 
-type Update interface {
-	Update(s *Server)
+type Purchase struct {
+	Product *Product
+	Count   int
 }
 
 type Query struct {
-	State    int
-	Location Location
-	Products []Product
-	Sum      int
+	State     int
+	Location  string
+	Purchases []Purchase
+	Sum       float64
+	ChatID    int64
+}
+
+func (q *Query) ToString() string {
+	fmt.Println()
+	str := ""
+	for _, p := range q.Purchases {
+		str += p.ToString()
+	}
+	str += "sum: " + strconv.FormatFloat(q.Sum, 'f', 2, 64) + "\n"
+	return str
+}
+
+func (p *Purchase) ToString() string {
+	return p.Product.Name + " " + string(p.Count) + "\n"
 }

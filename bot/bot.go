@@ -11,8 +11,10 @@ import (
 )
 
 type Bot struct {
-	api *tgbotapi.BotAPI
-	cfg encio.Config
+	api      *tgbotapi.BotAPI
+	cfg      encio.Config
+	UsersMsg map[int64]int
+	//Updates  *chan server.Update
 }
 
 func NewBot(key encio.EncIO) *Bot {
@@ -43,15 +45,45 @@ func (b *Bot) initAPI() {
 }
 
 func (b *Bot) Listen() {
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
+	b.UsersMsg = make(map[int64]int)
 
+	updates, err := b.api.GetUpdatesChan(u)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	for update := range updates {
+		if update.CallbackQuery != nil {
+			continue
+		}
+
+		if update.Message != nil {
+			if update.Message.Text != "" {
+				delcfg := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
+				if _, err := b.api.DeleteMessage(delcfg); err != nil {
+					log.Println(err)
+				}
+			}
+
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+
+			b.UpdateMsg(msg)
+			// if err != nil {
+			// 	fmt.Println(err)
+			// }
+
+			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+			continue
+		}
+	}
 }
 
 func (b *Bot) SpreadMessage(users []int64, msg string) {
 	log.Printf("Sending message to %v users\n", len(users))
 	for _, u := range users {
 		time.Sleep(100 * time.Millisecond)
-
-		log.Printf("Deleting previous msg for %v\n", u)
 
 		log.Printf("Sending to %v\n", u)
 		tgmsg := tgbotapi.NewMessage(u, msg)
@@ -60,4 +92,13 @@ func (b *Bot) SpreadMessage(users []int64, msg string) {
 			log.Println(err)
 		}
 	}
+}
+
+func (b *Bot) SendMessage(u int64, msg string) {
+	//log.Printf("Sending message to %v user\n", u)
+	time.Sleep(100 * time.Millisecond)
+
+	log.Printf("Sending to %v\n", u)
+	tgmsg := tgbotapi.NewMessage(u, msg)
+	b.UpdateMsg(tgmsg)
 }
