@@ -461,7 +461,7 @@ class MyHomePage extends StatelessWidget {
                   CupertinoButton.filled(
                     child: Text("Yes"),
                     onPressed: () {
-                      final servurl = 'https://34.89.201.1:9094/';
+                      final servurl = 'http://34.89.201.1:9094/';
                       final body = json.encode({
                         "chatid": globalParams.chatid,
                         "location": title,

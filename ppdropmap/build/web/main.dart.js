@@ -36986,7 +36986,7 @@ t.qa(null)
 return null},
 $S:1}
 F.HC.prototype={
-$0:function(){var t,s,r,q="https://34.89.201.1:9094/",p=u.N,o=C.aZ.e3(P.b1(["chatid",$.mc().d,"location",this.b],p,p))
+$0:function(){var t,s,r,q="http://34.89.201.1:9094/",p=u.N,o=C.aZ.e3(P.b1(["chatid",$.mc().d,"location",this.b],p,p))
 P.aN("body: "+H.a(o))
 try{G.a2Y(q,o).bl(new F.HA(),u.H)}catch(s){t=H.Q(s)
 P.aN("err: "+H.a(t))}r=this.c.p3(u.iK)
