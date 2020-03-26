@@ -11,7 +11,7 @@ import (
 func (s *Server) ReloadMsg(ChatID int64) {
 	query := s.GetQuery(ChatID)
 	var tgmsg tgbotapi.MessageConfig
-	if query.State != s.Tree {
+	if query.State != s.Tree || true {
 		text := query.Location + "\n" + query.ToString()
 		tgmsg = tgbotapi.NewMessage(ChatID, text)
 	} else {
@@ -50,7 +50,8 @@ func (s *Server) GenerateButtons(query *Query) tgbotapi.InlineKeyboardMarkup {
 			}
 		}
 
-		if back := query.State.Prev; back != nil && back.Product.Name != "root" {
+		//if back := query.State.Prev; back != nil && back.Product.Name != "root" {
+		if back := query.State.Prev; back != nil {
 			rows = append(rows, []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("go back", "change\n"+back.GetPath())})
 		}
 
