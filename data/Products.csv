@@ -1,13 +1,13 @@
 store name,product group,product,price
-Lotok,Lmilk,Milk1,1
-Lotok,Lmilk,Milk2,2
-Lotok,Lmilk,Milk3,3
-Lotok,Lmeet,Meet1,10
-Lotok,Lmeet,Meet2,20
-Lotok,Lmeet,Meet3,30
-Novus,Nmilk,Milk1,4
-Novus,Nmilk,Milk2,5
-Novus,Nmilk,Milk3,6
-Novus,Nmeet,Meet1,40
-Novus,Nmeet,Meet2,50
-Novus,Nmeet,Meet3,60
+Lotok,Milk,Prostokvashino,1
+Lotok,Milk,White Line,2
+Lotok,Cheese,chip,3
+Lotok,Cheese,normal,10
+Lotok,Cheese,expensive,20
+Lotok,Eggs,Big,30
+Novus,Milk,Prostokvashino,4
+Novus,Milk,White Line,5
+Novus,Cheese,chip,6
+Novus,Cheese,normal,40
+Novus,Cheese,expensive,50
+Novus,Eggs,Big,60

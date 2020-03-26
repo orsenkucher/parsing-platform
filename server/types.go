@@ -5,9 +5,15 @@ import (
 	"strconv"
 )
 
+type Location struct {
+	X float64
+	Y float64
+}
+
 type Product struct {
-	Name  string
-	Price float64
+	Name     string
+	Priority int
+	Price    float64
 }
 
 type Purchase struct {
