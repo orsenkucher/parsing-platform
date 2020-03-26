@@ -57,3 +57,21 @@ func GenerateTree() *ProdTree {
 	tree.AddFile("./data/Products.csv")
 	return tree
 }
+
+func (tree *ProdTree) GetNode(path string) *ProdTree {
+	nodes := strings.Split(path, ",")
+	for i := 1; i < len(nodes); i++ {
+		tree = tree.Next[nodes[i]]
+	}
+	return tree
+}
+
+func (tree *ProdTree) GetPath() string {
+	path := tree.Product.Name
+	tree = tree.Prev
+	for tree != nil {
+		path = tree.Product.Name + "," + path
+		tree = tree.Prev
+	}
+	return path
+}

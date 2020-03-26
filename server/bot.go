@@ -55,6 +55,7 @@ func (b *Bot) Listen() {
 
 	for update := range updates {
 		if update.CallbackQuery != nil {
+			b.handleCallback(update)
 			continue
 		}
 
@@ -84,6 +85,7 @@ func (b *Bot) UpdateMsg(msg tgbotapi.MessageConfig) {
 	prevID, ok := b.UsersMsg[msg.ChatID]
 	if ok {
 		updatemsg := tgbotapi.NewEditMessageText(msg.ChatID, prevID, msg.Text)
+		updatemsg.ReplyMarkup = msg.ReplyMarkup.(*tgbotapi.InlineKeyboardMarkup)
 		_, err := b.api.Send(updatemsg)
 		if err != nil {
 			fmt.Print(err)
