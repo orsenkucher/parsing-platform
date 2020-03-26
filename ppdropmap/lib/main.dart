@@ -27,6 +27,8 @@ void main() {
 ParamsModel globalParams = ParamsModel();
 final router = Router();
 
+bool showingDialog = false;
+
 class ParamsModel extends Model {
   String _chatid;
   String get chatid => _chatid;
@@ -275,7 +277,7 @@ class MyHomePage extends StatelessWidget {
 
       final mapOptions = MapOptions()
         ..zoom = globalParams.chatid == null ? 13 : 16
-        ..clickableIcons = true
+        ..clickableIcons = false
         ..disableDefaultUI = true
         // ..streetViewControl = false
         // ..zoomControl = false
@@ -375,6 +377,7 @@ class MyHomePage extends StatelessWidget {
       map.addListener("click", (e) {
         // print("CLICK");
         if (globalParams.chatid == null) return;
+        if (showingDialog) return;
         try {
           print(e["latLng"]);
           // print(e.position);
@@ -432,11 +435,13 @@ class MyHomePage extends StatelessWidget {
               ?.title;
           print(title);
           if (title != null) {
+            showingDialog = true;
             showCupertinoDialog(
               context: buildcontext,
               builder: (context) => AlertDialog(
                 title: Text("Continue shopping in"),
                 content: Text(title),
+                // buttonPadding: EdgeInsets.all(24),
                 // Row(
                 //   children: [
                 //     Icon(Icons.shopping_cart),
@@ -456,7 +461,10 @@ class MyHomePage extends StatelessWidget {
                 actions: <Widget>[
                   CupertinoButton(
                     child: Text("No"),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      showingDialog = false;
+                    },
                   ),
                   CupertinoButton.filled(
                     child: Text("Yes"),
@@ -474,6 +482,7 @@ class MyHomePage extends StatelessWidget {
                         print('err: $err');
                       }
                       Navigator.pop(context);
+                      showingDialog = false;
                       print("NAJALOS");
                       _onPressed();
                     },
