@@ -3,7 +3,11 @@
 // import 'dart:js';
 
 import 'dart:convert';
+import 'dart:js';
+import 'dart:math' as m;
 
+import 'package:fluro/fluro.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart';
 import 'package:scoped_model/scoped_model.dart';
 
@@ -21,6 +25,7 @@ void main() {
 }
 
 ParamsModel globalParams = ParamsModel();
+final router = Router();
 
 class ParamsModel extends Model {
   String _chatid;
@@ -36,6 +41,19 @@ class ParamsModel extends Model {
 }
 
 class MyApp extends StatelessWidget {
+  var usersHandler =
+      Handler(handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+    // return UsersScreen(params["id"][0]);
+    return MyHomePage();
+  });
+
+  void defineRoutes(Router router) {
+    router.define("/users/:id", handler: usersHandler);
+
+    // it is also possible to define the route transition to use
+    // router.define("users/:id", handler: usersHandler, transitionType: TransitionType.inFromLeft);
+  }
+
   // This widget is the root of your application.
   // var currentparams = <String, String>{};
   @override
@@ -214,9 +232,21 @@ class MyHomePage extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: <Widget>[
-          if (globalParams.chatid != null) _map(),
+          // if (globalParams.chatid != null) _map(),
+          _map(context),
           // _map2(),
           _redirect(),
+          Align(
+            alignment: Alignment.topCenter,
+            child: Text(
+              globalParams.chatid ?? "none",
+              style: TextStyle(
+                backgroundColor: Colors.black.withOpacity(1),
+                color: Colors.red,
+                fontSize: 33,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -230,7 +260,7 @@ class MyHomePage extends StatelessWidget {
   //   );
   // }
 
-  Widget _map() {
+  Widget _map(BuildContext buildcontext) {
     String htmlId = "71";
 
     // ignore: undefined_prefixed_name
@@ -260,32 +290,64 @@ class MyHomePage extends StatelessWidget {
       final map = GMap(elem, mapOptions);
 
       // Setup markers
-      <PosName>[
+      // <PosName>[
+      //   PosName(name: "Lotok", pos: mc1),
+      //   PosName(name: "Novus", pos: mc2)
+      // ].forEach((pn) {
+      //   Marker(MarkerOptions()
+      //         ..position = pn.pos
+      //         ..map = map
+      //         ..clickable = true
+      //         ..title = pn.name)
+      //       .addListener("click", () {
+      //     print(pn.name);
+      //     final servurl = 'http://34.89.201.1:9094/';
+      //     final body = json.encode({
+      //       "chatid": globalParams.chatid,
+      //       "location": pn.name,
+      //     });
+      //     print('body: $body');
+      //     try {
+      //       post(servurl, body: body).then((resp) => print(resp.statusCode));
+      //     } on dynamic catch (err) {
+      //       print('err: $err');
+      //     }
+      //     print("NAJALOS");
+      //     _onPressed();
+      //   });
+      // });
+
+      final markers = <PosName>[
         PosName(name: "Lotok", pos: mc1),
         PosName(name: "Novus", pos: mc2)
-      ].forEach((pn) {
-        Marker(MarkerOptions()
-              ..position = pn.pos
-              ..map = map
-              ..clickable = true
-              ..title = pn.name)
-            .addListener("click", () async {
-          print(pn.name);
-          final servurl = 'http://34.89.201.1:9094/';
-          final body = json.encode({
-            "chatid": globalParams.chatid,
-            "location": pn.name,
-          });
-          print('body: $body');
-          try {
-            final resp = await post(servurl, body: body);
-            print(resp.statusCode);
-          } on dynamic catch (err) {
-            print('err: $err');
-          }
-          _onPressed();
+      ].map((pn) => Marker(MarkerOptions()
+        ..position = pn.pos
+        ..map = map
+        ..clickable = false //true
+        ..title = pn.name));
+// Iterable.it
+      final iter = markers.iterator;
+      while (iter.moveNext()) {
+        iter.current.addListener("click", () {
+          print("CLICK");
         });
-      });
+      }
+      // .addListener("click", () {
+      //     print(pn.name);
+      //     final servurl = 'http://34.89.201.1:9094/';
+      //     final body = json.encode({
+      //       "chatid": globalParams.chatid,
+      //       "location": pn.name,
+      //     });
+      //     print('body: $body');
+      //     try {
+      //       post(servurl, body: body).then((resp) => print(resp.statusCode));
+      //     } on dynamic catch (err) {
+      //       print('err: $err');
+      //     }
+      //     print("NAJALOS");
+      //     _onPressed();
+      //   });
 
       // Marker(MarkerOptions()
       //       ..position = mc1
@@ -310,24 +372,140 @@ class MyHomePage extends StatelessWidget {
       //   ..clickable = true
       //   ..title = 'Kyiv');
 
-      // map.addListener("click", (e) {
-      //   print("CLICK");
-      //   try {
-      //     print(e["latLng"]);
-      //     // print(e.position);
-      //     final jsLatLng = e["latLng"] as JsObject;
-      //     // final jsLat = jsLatLng.callMethod("lat");
-      //     // final jsLng = jsLatLng.callMethod("lng");
-      //     // map.panTo(marker.getPosition());
-      //     var marker = Marker()
-      //       ..map = map
-      //       ..position = LatLng.created(jsLatLng);
-      //     // // map.panTo(latLng);
-      //     map.panTo(marker.position);
-      //   } catch (_) {
-      //     print(_);
-      //   }
-      // });
+      map.addListener("click", (e) {
+        // print("CLICK");
+        if (globalParams.chatid == null) return;
+        try {
+          print(e["latLng"]);
+          // print(e.position);
+          final jsLatLng = e["latLng"] as JsObject;
+          // final jsLat = jsLatLng.callMethod("lat");
+          // final jsLng = jsLatLng.callMethod("lng");
+          // map.panTo(marker.getPosition());
+          print("MAP CLICK");
+// TODO DISTANCE
+          // metersPerPx = 156543.03392 * Math.cos(latLng.lat() * Math.PI / 180) / Math.pow(2, zoom)
+          double metersPerPx(LatLng ltlg, int zoom) {
+            return 156543.03392 * m.cos(ltlg.lat * m.pi / 180) / m.pow(2, zoom);
+          }
+
+          double haversineDistance(LatLng mk1, LatLng mk2) {
+            var R = // Radius of the Earth in miles * mile/meter
+                3958.8 * 1609.34;
+            var rlat1 = mk1.lat * (m.pi / 180); // Convert degrees to radians
+            var rlat2 = mk2.lat * (m.pi / 180); // Convert degrees to radians
+            var difflat = rlat2 - rlat1; // Radian difference (latitudes)
+            var difflon = (mk2.lng - mk1.lng) *
+                (m.pi / 180); // Radian difference (longitudes)
+
+            var d = 2 *
+                R *
+                m.asin(m.sqrt(m.sin(difflat / 2) * m.sin(difflat / 2) +
+                    m.cos(rlat1) *
+                        m.cos(rlat2) *
+                        m.sin(difflon / 2) *
+                        m.sin(difflon / 2)));
+            return d;
+          }
+
+          // latLng.
+          final mpp = metersPerPx(map.center, map.zoom);
+          print('center: ${map.center}');
+          print('zoom: ${map.zoom}');
+          print('mpp: $mpp');
+
+          final latLng = LatLng.created(jsLatLng);
+          final meters = haversineDistance(map.center, latLng);
+          print('meters: $meters');
+          print('pixels: ${meters / mpp}');
+
+          double pixels(LatLng m1, LatLng m2) {
+            final m = haversineDistance(m1, m2);
+            return m / mpp;
+          }
+
+          final title = markers
+              .firstWhere(
+                (m2) => pixels(latLng, m2.position) < 50.0,
+                orElse: () => null,
+              )
+              ?.title;
+          print(title);
+          if (title != null) {
+            showCupertinoDialog(
+              context: buildcontext,
+              builder: (context) => AlertDialog(
+                title: Text("Continue shopping in"),
+                content: Text(title),
+                // Row(
+                //   children: [
+                //     Icon(Icons.shopping_cart),
+                //     Text(title),
+                //   ]
+                // ),
+                // actions: <Widget>[
+                //   CupertinoDialogAction(
+                //     isDefaultAction: true,
+                //     child: Text("Move"),
+                //   ),
+                //   CupertinoDialogAction(
+                //     isDefaultAction: false,
+                //     child: Text("Stay"),
+                //   )
+                // ],
+                actions: <Widget>[
+                  CupertinoButton(
+                    child: Text("No"),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  CupertinoButton.filled(
+                    child: Text("Yes"),
+                    onPressed: () {
+                      final servurl = 'https://34.89.201.1:9094/';
+                      final body = json.encode({
+                        "chatid": globalParams.chatid,
+                        "location": title,
+                      });
+                      print('body: $body');
+                      try {
+                        post(servurl, body: body)
+                            .then((resp) => print(resp.statusCode));
+                      } on dynamic catch (err) {
+                        print('err: $err');
+                      }
+                      Navigator.pop(context);
+                      print("NAJALOS");
+                      _onPressed();
+                    },
+                  )
+                ],
+              ),
+            );
+
+            // final servurl = 'http://34.89.201.1:9094/';
+            // final body = json.encode({
+            //   "chatid": globalParams.chatid,
+            //   "location": title,
+            // });
+            // print('body: $body');
+            // try {
+            //   post(servurl, body: body).then((resp) => print(resp.statusCode));
+            // } on dynamic catch (err) {
+            //   print('err: $err');
+            // }
+            // print("NAJALOS");
+            // _onPressed();
+          }
+
+          // var marker = Marker()
+          //   ..map = map
+          //   ..position = LatLng.created(jsLatLng);
+          // // // map.panTo(latLng);
+          // map.panTo(marker.position);
+        } catch (_) {
+          print(_);
+        }
+      });
 
       return elem;
     });
