@@ -128,7 +128,7 @@ func (s *Server) ShowBasketButtons(query *Query) tgbotapi.InlineKeyboardMarkup {
 
 		return tgbotapi.NewInlineKeyboardMarkup(rows...)
 	} else {
-		urlbutton := tgbotapi.NewInlineKeyboardButtonURL("OpenMap", fmt.Sprintf("https://scheduleuabot.firebaseapp.com/#?chatid=%v", query.ChatID))
+		urlbutton := tgbotapi.NewInlineKeyboardButtonURL("OpenMap", fmt.Sprintf("http://34.89.201.1:5000/#?chatid=%v", query.ChatID))
 		//locbutton := tgbotapi.NewKeyboardButtonLocation("Give your Location")
 
 		rows := [][]tgbotapi.InlineKeyboardButton{[]tgbotapi.InlineKeyboardButton{urlbutton}}
