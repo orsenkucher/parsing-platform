@@ -1,7 +1,5 @@
 package server
 
-import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-
 type Update interface {
 	Update(s *Server)
 }
@@ -22,8 +20,7 @@ func (u *NewLocation) Update(s *Server) {
 		}
 		s.ReloadMsg(u.ChatID)
 	} else {
-		tgmsg := tgbotapi.NewMessage(u.ChatID, "Not Proper location")
-		s.Bot.api.Send(tgmsg)
+		s.ReloadMsg(u.ChatID)
 	}
 	//s.Bot.SendMessage(u.ChatID, u.Location+"\n"+s.Queries[u.ChatID].ToString())
 }

@@ -24,13 +24,13 @@ func (s *Server) ReloadMsg(ChatID int64) {
 
 func (s *Server) GenerateButtons(state *ProdTree) tgbotapi.InlineKeyboardMarkup {
 	fmt.Println(state.Product.Name)
-	if state != s.Tree || true {
+	if state != s.Tree {
 		nodes := make([]*ProdTree, 0, len(state.Next)+1)
 		for _, v := range state.Next {
 			nodes = append(nodes, v)
 		}
 
-		var rows [][]tgbotapi.InlineKeyboardButton
+		rows := [][]tgbotapi.InlineKeyboardButton{}
 		for _, node := range nodes {
 			text := node.Product.Name
 			path := node.GetPath()
@@ -51,6 +51,8 @@ func (s *Server) GenerateButtons(state *ProdTree) tgbotapi.InlineKeyboardMarkup 
 
 		return tgbotapi.NewInlineKeyboardMarkup(rows...)
 	} else {
-		return tgbotapi.InlineKeyboardMarkup{}
+		button := tgbotapi.NewInlineKeyboardButtonData("OpenMap", "\n")
+		rows := [][]tgbotapi.InlineKeyboardButton{[]tgbotapi.InlineKeyboardButton{button}}
+		return tgbotapi.NewInlineKeyboardMarkup(rows...)
 	}
 }
