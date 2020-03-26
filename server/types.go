@@ -6,8 +6,9 @@ import (
 )
 
 type Product struct {
-	Name  string
-	Price float64
+	Name     string
+	Priority int
+	Price    float64
 }
 
 type Purchase struct {

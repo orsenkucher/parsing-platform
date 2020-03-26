@@ -6,12 +6,12 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 type LocationReq struct {
-	UID int64   `json:"uid"`
-	X   float64 `json:"x"`
-	Y   float64 `json:"y"`
+	ChatID   string `json:"uid"`
+	Location string `json:"location"`
 }
 
 func (s *Server) GetLocation(w http.ResponseWriter, r *http.Request) {
@@ -25,8 +25,9 @@ func (s *Server) GetLocation(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
+	chatid, _ := strconv.ParseInt(req.ChatID, 10, 64)
+	s.Updates <- &NewLocation{Location: req.Location, ChatID: chatid}
 	fmt.Println()
-	fmt.Println(req.X)
-	fmt.Println(req.Y)
-	fmt.Println("uid: ", req.UID)
+	fmt.Println(req.Location)
+	fmt.Println("uid: ", req.ChatID)
 }

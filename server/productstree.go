@@ -29,7 +29,7 @@ func (tree *ProdTree) AddProduct(line *string) {
 	for j := 0; j < len(nodes)-1; j++ {
 		_, ok := tree.Next[nodes[j]]
 		if !ok {
-			tree.Next[nodes[j]] = &ProdTree{Product: Product{Name: nodes[j]}, Prev: tree, Next: make(map[string]*ProdTree)}
+			tree.Next[nodes[j]] = &ProdTree{Product: Product{Name: nodes[j], Priority: len(tree.Next) + tree.Product.Priority*100}, Prev: tree, Next: make(map[string]*ProdTree)}
 		}
 		tree = tree.Next[nodes[j]]
 	}

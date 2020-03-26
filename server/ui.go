@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -17,18 +18,22 @@ func (s *Server) ReloadMsg(ChatID int64) {
 		text := "Choose your store"
 		tgmsg = tgbotapi.NewMessage(ChatID, text)
 	}
-	mkp := s.GenerateButtons(query.State)
+	mkp := s.GenerateButtons(query)
 	tgmsg.ReplyMarkup = &mkp
 	s.Bot.UpdateMsg(tgmsg)
 }
 
-func (s *Server) GenerateButtons(state *ProdTree) tgbotapi.InlineKeyboardMarkup {
-	fmt.Println(state.Product.Name)
-	if state != s.Tree {
-		nodes := make([]*ProdTree, 0, len(state.Next)+1)
-		for _, v := range state.Next {
+func (s *Server) GenerateButtons(query *Query) tgbotapi.InlineKeyboardMarkup {
+	fmt.Println(query.State.Product.Name)
+	if query.State != s.Tree {
+		nodes := make([]*ProdTree, 0, len(query.State.Next)+1)
+		for _, v := range query.State.Next {
 			nodes = append(nodes, v)
 		}
+
+		sort.Slice(nodes, func(i, j int) bool {
+			return nodes[i].Product.Priority < nodes[j].Product.Priority
+		})
 
 		rows := [][]tgbotapi.InlineKeyboardButton{}
 		for _, node := range nodes {
@@ -41,17 +46,17 @@ func (s *Server) GenerateButtons(state *ProdTree) tgbotapi.InlineKeyboardMarkup 
 				button := tgbotapi.NewInlineKeyboardButtonData(text+" "+strconv.FormatFloat(node.Product.Price, 'f', 2, 64), "\n"+path)
 				addButton := tgbotapi.NewInlineKeyboardButtonData("+", "add\n"+path)
 				subButton := tgbotapi.NewInlineKeyboardButtonData("-", "sub\n"+path)
-				rows = append(rows, []tgbotapi.InlineKeyboardButton{addButton, button, subButton})
+				rows = append(rows, []tgbotapi.InlineKeyboardButton{subButton, button, addButton})
 			}
 		}
 
-		if back := state.Prev; back != nil && back.Product.Name != "root" {
+		if back := query.State.Prev; back != nil && back.Product.Name != "root" {
 			rows = append(rows, []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData(back.Product.Name, "change\n"+back.GetPath())})
 		}
 
 		return tgbotapi.NewInlineKeyboardMarkup(rows...)
 	} else {
-		urlbutton := tgbotapi.NewInlineKeyboardButtonURL("OpenMap", fmt.Sprintf("https://scheduleuabot.web.app/#/map?chatid=%v&lat=%v&lng=%v", 1, 2, 3))
+		urlbutton := tgbotapi.NewInlineKeyboardButtonURL("OpenMap", fmt.Sprintf("https://scheduleuabot.web.app/#/map?chatid=%v&lat=%v&lng=%v", query.ChatID, 2, 3))
 		// locbutton := tgbotapi.NewKeyboardButtonLocation("Give your Location");
 		rows := [][]tgbotapi.InlineKeyboardButton{[]tgbotapi.InlineKeyboardButton{urlbutton}}
 		return tgbotapi.NewInlineKeyboardMarkup(rows...)
