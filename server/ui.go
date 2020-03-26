@@ -51,8 +51,9 @@ func (s *Server) GenerateButtons(state *ProdTree) tgbotapi.InlineKeyboardMarkup 
 
 		return tgbotapi.NewInlineKeyboardMarkup(rows...)
 	} else {
-		button := tgbotapi.NewInlineKeyboardButtonData("OpenMap", "\n")
-		rows := [][]tgbotapi.InlineKeyboardButton{[]tgbotapi.InlineKeyboardButton{button}}
+		urlbutton := tgbotapi.NewInlineKeyboardButtonURL("OpenMap", fmt.Sprintf("https://scheduleuabot.web.app/#/map?chatid=%v&lat=%v&lng=%v", 1, 2, 3))
+		// locbutton := tgbotapi.NewKeyboardButtonLocation("Give your Location");
+		rows := [][]tgbotapi.InlineKeyboardButton{[]tgbotapi.InlineKeyboardButton{urlbutton}}
 		return tgbotapi.NewInlineKeyboardMarkup(rows...)
 	}
 }
