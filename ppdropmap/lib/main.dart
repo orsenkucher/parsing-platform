@@ -23,6 +23,24 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: MyHomePage(title: 'pp-drop: map'),
+      // My url pattern: www.app.com/#/xLZppqzSiSxaFu4PB7Ui
+      onGenerateRoute: (settings) {
+        List<String> pathComponents = settings.name.split('/');
+        if (pathComponents[1] == 'invoice') {
+          return MaterialPageRoute(
+            builder: (context) {
+              // return Invoice(arguments: pathComponents.last);
+              return Placeholder();
+            },
+          );
+        } else
+          return MaterialPageRoute(
+            builder: (context) {
+              // return LandingPage();
+              return Placeholder();
+            },
+          );
+      },
       debugShowCheckedModeBanner: false,
     );
   }
