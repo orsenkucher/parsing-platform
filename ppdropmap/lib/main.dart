@@ -1,4 +1,5 @@
 // import 'package:easy_google_maps/easy_google_maps.dart';
+// ignore: avoid_web_libraries_in_flutter
 import 'dart:js';
 
 import 'package:flutter/material.dart';
@@ -22,24 +23,57 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'pp-drop: map'),
+      initialRoute: '/',
       // My url pattern: www.app.com/#/xLZppqzSiSxaFu4PB7Ui
       onGenerateRoute: (settings) {
-        List<String> pathComponents = settings.name.split('/');
-        if (pathComponents[1] == 'invoice') {
-          return MaterialPageRoute(
-            builder: (context) {
-              // return Invoice(arguments: pathComponents.last);
-              return Placeholder();
-            },
+        print("=========");
+        // print(settings);
+        // print('route: ' + settings.name);
+        // print(settings.arguments);
+        final uri = Uri.tryParse(settings.name);
+        print('uri: $uri');
+
+        // var params = <String, String>{};
+        // try {
+        //   params = uri?.queryParameters;
+        // } catch (_) {
+        //   print(_);
+        // }
+        final params = uri.queryParameters;
+        // print(params);
+        params.forEach((k, v) {
+          print('-> $k: $v');
+        });
+        // print(params['chatid']);
+        // print(params['lat']);
+        // print(params['lng']);
+        // print("=========");
+
+// TODO
+        return MaterialPageRoute(builder: (context) {
+          return MyHomePage(
+            chatid: params['chatid'],
+            lat: params['lat'] != null ? double.tryParse(params['lat']) : null,
+            lng: params['lng'] != null ? double.tryParse(params['lng']) : null,
           );
-        } else
-          return MaterialPageRoute(
-            builder: (context) {
-              // return LandingPage();
-              return Placeholder();
-            },
-          );
+        });
+
+        // List<String> pathComponents = settings.name.split('/');
+        // if (pathComponents[1] == 'invoice') {
+        //   return MaterialPageRoute(
+        //     builder: (context) {
+        //       // return Invoice(arguments: pathComponents.last);
+        //       return Placeholder();
+        //     },
+        //   );
+        // } else {
+        //   return MaterialPageRoute(
+        //     builder: (context) {
+        //       // return LandingPage();
+        //       return Placeholder();
+        //     },
+        //   );
+        // }
       },
       debugShowCheckedModeBanner: false,
     );
@@ -47,8 +81,14 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  final String title;
-  MyHomePage({Key key, this.title}) : super(key: key);
+  final String chatid;
+  final double lat;
+  final double lng;
+  MyHomePage({
+    this.chatid,
+    this.lat,
+    this.lng,
+  });
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -92,11 +132,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // ignore: undefined_prefixed_name
     ui.platformViewRegistry.registerViewFactory(htmlId, (int viewId) {
-      final mc1 = LatLng(50.4510788, 30.5192703);
+      final mc1 = LatLng(50.451692, 30.521545);
       final mc2 = LatLng(50.4491999, 30.5226107);
 
+      print("CHATID ${widget.chatid}");
+      // print(widget.)
+
       final mapOptions = MapOptions()
-        ..zoom = 16
+        ..zoom = widget.chatid == null ? 13 : 16
         ..clickableIcons = true
         ..disableDefaultUI = true
         // ..streetViewControl = false
@@ -111,36 +154,42 @@ class _MyHomePageState extends State<MyHomePage> {
 
       final map = GMap(elem, mapOptions);
 
-      Marker(MarkerOptions()
-        ..position = mc1
-        ..map = map
-        ..clickable = true
-        ..title = 'Hello');
+      // Setup markers
 
-      final m = Marker(MarkerOptions()
+      Marker(MarkerOptions()
+            ..position = mc1
+            ..map = map
+            ..clickable = true
+            ..title = 'Hello')
+          .addListener("click", () {
+        print("Hello marker");
+      });
+
+      Marker(MarkerOptions()
         ..position = mc2
         ..map = map
         ..clickable = true
         ..title = 'Kyiv');
 
-      map.addListener("click", (e) {
-        print("CLICK");
-        try {
-          print(e["latLng"]);
-          // print(e.position);
-          final jsLatLng = e["latLng"] as JsObject;
-          // final jsLat = jsLatLng.callMethod("lat");
-          // final jsLng = jsLatLng.callMethod("lng");
-          // map.panTo(marker.getPosition());
-          var marker = Marker()
-            ..map = map
-            ..position = LatLng.created(jsLatLng);
-          // // map.panTo(latLng);
-          map.panTo(marker.position);
-        } catch (_) {
-          print(_);
-        }
-      });
+      // map.addListener("click", (e) {
+      //   print("CLICK");
+      //   try {
+      //     print(e["latLng"]);
+      //     // print(e.position);
+      //     final jsLatLng = e["latLng"] as JsObject;
+      //     // final jsLat = jsLatLng.callMethod("lat");
+      //     // final jsLng = jsLatLng.callMethod("lng");
+      //     // map.panTo(marker.getPosition());
+      //     var marker = Marker()
+      //       ..map = map
+      //       ..position = LatLng.created(jsLatLng);
+      //     // // map.panTo(latLng);
+      //     map.panTo(marker.position);
+      //   } catch (_) {
+      //     print(_);
+      //   }
+      // });
+
       return elem;
     });
 
