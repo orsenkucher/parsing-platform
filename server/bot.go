@@ -13,7 +13,6 @@ type Bot struct {
 	api      *tgbotapi.BotAPI
 	cfg      encio.Config
 	UsersMsg map[int64]int
-	UsersLoc map[int64]Location
 	Updates  chan Update
 }
 
@@ -48,7 +47,6 @@ func (b *Bot) Listen() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 	b.UsersMsg = make(map[int64]int)
-	b.UsersLoc = make(map[int64]Location)
 
 	updates, err := b.api.GetUpdatesChan(u)
 	if err != nil {

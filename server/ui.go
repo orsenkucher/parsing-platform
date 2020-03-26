@@ -137,8 +137,8 @@ func (s *Server) ShowBasketButtons(query *Query) tgbotapi.InlineKeyboardMarkup {
 }
 
 func LowButtoms(q *Query) []tgbotapi.InlineKeyboardButton {
-	menu := tgbotapi.NewInlineKeyboardButtonData("Menu", "menu\n")
-	location := tgbotapi.NewInlineKeyboardButtonData("Location", "location\n")
-	basket := tgbotapi.NewInlineKeyboardButtonData("Basket: "+strconv.FormatFloat(q.Sum, 'f', 2, 64), "basket\n")
+	menu := tgbotapi.NewInlineKeyboardButtonData("🏠", "menu\n")
+	location := tgbotapi.NewInlineKeyboardButtonData("📍", "reset\n")
+	basket := tgbotapi.NewInlineKeyboardButtonData("🧺 "+strconv.FormatFloat(q.Sum, 'f', 2, 64), "basket\n")
 	return []tgbotapi.InlineKeyboardButton{menu, location, basket}
 }

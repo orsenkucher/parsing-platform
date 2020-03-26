@@ -86,7 +86,7 @@ type BasketReq struct {
 func (u *BasketReq) Update(s *Server) {
 	query := s.GetQuery(u.ChatID)
 	query.State = nil
-	s.ReloadMsg(query.ChatID)
+	s.ReloadMsg(u.ChatID)
 }
 
 type MenuReq struct {
@@ -96,7 +96,16 @@ type MenuReq struct {
 func (u *MenuReq) Update(s *Server) {
 	query := s.GetQuery(u.ChatID)
 	query.State = s.Tree.Next[query.Location]
-	s.ReloadMsg(query.ChatID)
+	s.ReloadMsg(u.ChatID)
+}
+
+type Reset struct {
+	ChatID int64
+}
+
+func (u *Reset) Update(s *Server) {
+	delete(s.Queries, u.ChatID)
+	s.ReloadMsg(u.ChatID)
 }
 
 func (s *Server) GetQuery(ChatID int64) *Query {

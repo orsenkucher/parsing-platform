@@ -9,9 +9,6 @@ import (
 
 func (b *Bot) NewLocation(chatid int64, loc string) {
 	nl := &NewLocation{Location: loc, ChatID: chatid}
-	// if b.Updates == nil {
-	// 	fmt.Println("asfsdsgs")
-	// }
 	b.Updates <- nl
 }
 
@@ -33,5 +30,8 @@ func (b *Bot) handleCallback(update tgbotapi.Update) {
 	}
 	if data[0] == "menu" {
 		b.Updates <- &MenuReq{ChatID: ChatID}
+	}
+	if data[0] == "reset" {
+		b.Updates <- &Reset{ChatID: ChatID}
 	}
 }
