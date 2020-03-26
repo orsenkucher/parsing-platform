@@ -1,13 +1,13 @@
 store name,product group,product,price
-Lotok,Молоко,Яготинстке,1
-Lotok,Молоко,Біла Лінія,2
-Lotok,Кефір,Яготинстке,3
-Lotok,Кефір,Біла Лінія,10
-Lotok,Кефір,Простоквашино,20
-Lotok,Яйця,Велетні,30
-Novus,Ковбаси,Брауншвейська,4
-Novus,Ковбаси,Московська,5
-Novus,М“ясо,Курка,6
-Novus,М“ясо,Свинина,40
-Novus,М“ясо,Говядина,50
-Novus,Сметана,Простоквашино,60
+Lotok,Milk,Prostokvashino,1
+Lotok,Milk,White Line,2
+Lotok,Cheese,chip,3
+Lotok,Cheese,normal,10
+Lotok,Cheese,expensive,20
+Lotok,Eggs,Big,30
+Novus,Milk,Prostokvashino,4
+Novus,Milk,White Line,5
+Novus,Cheese,chip,6
+Novus,Cheese,normal,40
+Novus,Cheese,expensive,50
+Novus,Eggs,Big,60
