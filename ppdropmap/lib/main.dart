@@ -1,6 +1,10 @@
+// import 'package:easy_google_maps/easy_google_maps.dart';
+import 'dart:js';
+
 import 'package:flutter/material.dart';
-import 'package:google_maps/google_maps.dart' hide Icon;
 import 'package:url_launcher/url_launcher.dart';
+
+import 'package:google_maps/google_maps.dart' hide Icon;
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html';
 import 'dart:ui' as ui;
@@ -50,11 +54,20 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Stack(
         children: <Widget>[
           _map(),
+          // _map2(),
           _redirect(),
         ],
       ),
     );
   }
+
+  // Widget _map2() {
+  //   return EasyGoogleMaps(
+  //     apiKey: 'AIzaSyAfLJ5LaS3SZs68_O1zh4lgvXosMjLb_jk',
+  //     address: 'Infinite Loop, Cupertino, CA 95014',
+  //     title: 'Apple Campus',
+  //   );
+  // }
 
   Widget _map() {
     String htmlId = "7";
@@ -86,12 +99,30 @@ class _MyHomePageState extends State<MyHomePage> {
         ..clickable = true
         ..title = 'Hello');
 
-      Marker(MarkerOptions()
+      final m = Marker(MarkerOptions()
         ..position = mc2
         ..map = map
         ..clickable = true
         ..title = 'Kyiv');
 
+      map.addListener("click", (e) {
+        print("CLICK");
+        try {
+          print(e["latLng"]);
+          // print(e.position);
+          final jsLatLng = e["latLng"] as JsObject;
+          // final jsLat = jsLatLng.callMethod("lat");
+          // final jsLng = jsLatLng.callMethod("lng");
+          // map.panTo(marker.getPosition());
+          var marker = Marker()
+            ..map = map
+            ..position = LatLng.created(jsLatLng);
+          // // map.panTo(latLng);
+          map.panTo(marker.position);
+        } catch (_) {
+          print(_);
+        }
+      });
       return elem;
     });
 
