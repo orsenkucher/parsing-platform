@@ -45,8 +45,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/',
-      routes: {'/': (_) => MyHomePage()},
+      // initialRoute: '/',
+      // routes: {'/': (_) => MyHomePage()},
       // navigatorKey: , // TODO
       // navigatorKey: locator<NavigationService>().navigatorKey,
       builder: (context, child) {
@@ -58,7 +58,7 @@ class MyApp extends StatelessWidget {
       },
 
       // My url pattern: www.app.com/#/xLZppqzSiSxaFu4PB7Ui
-      onUnknownRoute: (settings) {
+      onGenerateRoute: (settings) {
         print(
           "onUnknownRoute onUnknownRoute onUnknownRoute onUnknownRoute onUnknownRoute",
         );
@@ -132,6 +132,8 @@ class MyApp extends StatelessWidget {
         //       return kek;
         //     });
         return MaterialPageRoute(
+          settings: settings,
+          maintainState: true,
           builder: (context) => MyHomePage(),
         );
         // List<String> pathComponents = settings.name.split('/');
@@ -208,10 +210,11 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("BUILDER-2");
     return Scaffold(
       body: Stack(
         children: <Widget>[
-          _map(),
+          if (globalParams.chatid != null) _map(),
           // _map2(),
           _redirect(),
         ],
@@ -273,14 +276,14 @@ class MyHomePage extends StatelessWidget {
             "chatid": globalParams.chatid,
             "location": pn.name,
           });
-
+          print('body: $body');
           try {
             final resp = await post(servurl, body: body);
             print(resp.statusCode);
-            _onPressed();
           } on dynamic catch (err) {
             print('err: $err');
           }
+          _onPressed();
         });
       });
 
