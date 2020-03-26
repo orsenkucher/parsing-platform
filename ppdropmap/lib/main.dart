@@ -2,6 +2,9 @@
 // ignore: avoid_web_libraries_in_flutter
 // import 'dart:js';
 
+import 'dart:convert';
+
+import 'package:http/http.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import 'package:flutter/material.dart';
@@ -254,21 +257,55 @@ class MyHomePage extends StatelessWidget {
       final map = GMap(elem, mapOptions);
 
       // Setup markers
+      <PosName>[
+        PosName(name: "Lotok", pos: mc1),
+        PosName(name: "Novus", pos: mc2)
+      ].forEach((pn) {
+        Marker(MarkerOptions()
+              ..position = pn.pos
+              ..map = map
+              ..clickable = true
+              ..title = pn.name)
+            .addListener("click", () async {
+          print(pn.name);
+          final servurl = 'http://34.89.201.1:9094/';
+          final body = json.encode({
+            "chatid": globalParams.chatid,
+            "location": pn.name,
+          });
 
-      Marker(MarkerOptions()
-            ..position = mc1
-            ..map = map
-            ..clickable = true
-            ..title = 'Hello')
-          .addListener("click", () {
-        print("Hello marker");
+          try {
+            final resp = await post(servurl, body: body);
+            print(resp.statusCode);
+            _onPressed();
+          } on dynamic catch (err) {
+            print('err: $err');
+          }
+        });
       });
 
-      Marker(MarkerOptions()
-        ..position = mc2
-        ..map = map
-        ..clickable = true
-        ..title = 'Kyiv');
+      // Marker(MarkerOptions()
+      //       ..position = mc1
+      //       ..map = map
+      //       ..clickable = true
+      //       ..title = 'Hello')
+      //     .addListener("click", () async {
+      //   print("Hello marker");
+      //   final servurl = 'http://34.89.201.1:9094/';
+      //   final body = json.encode({
+      //     "chatid": globalParams.chatid,
+      //     "location": "Hello marker",
+      //   });
+
+      //   final resp = await post(servurl, body: body);
+      //   print(resp.statusCode);
+      // });
+
+      // Marker(MarkerOptions()
+      //   ..position = mc2
+      //   ..map = map
+      //   ..clickable = true
+      //   ..title = 'Kyiv');
 
       // map.addListener("click", (e) {
       //   print("CLICK");
@@ -487,3 +524,9 @@ class MyHomePage extends StatelessWidget {
 //     );
 //   }
 // }
+
+class PosName {
+  final String name;
+  final LatLng pos;
+  const PosName({this.name, this.pos});
+}
