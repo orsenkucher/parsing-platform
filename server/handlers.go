@@ -10,7 +10,7 @@ import (
 )
 
 type LocationReq struct {
-	ChatID   string `json:"uid"`
+	ChatID   string `json:"chatid"`
 	Location string `json:"location"`
 }
 
