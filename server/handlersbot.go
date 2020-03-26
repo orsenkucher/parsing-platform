@@ -28,4 +28,10 @@ func (b *Bot) handleCallback(update tgbotapi.Update) {
 	if data[0] == "sub" {
 		b.Updates <- &Sub{ChatID: ChatID, Path: data[1]}
 	}
+	if data[0] == "basket" {
+		b.Updates <- &BasketReq{ChatID: ChatID}
+	}
+	if data[0] == "menu" {
+		b.Updates <- &MenuReq{ChatID: ChatID}
+	}
 }

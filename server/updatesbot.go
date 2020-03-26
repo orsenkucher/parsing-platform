@@ -79,6 +79,26 @@ func (u *Sub) Update(s *Server) {
 	}
 }
 
+type BasketReq struct {
+	ChatID int64
+}
+
+func (u *BasketReq) Update(s *Server) {
+	query := s.GetQuery(u.ChatID)
+	query.State = nil
+	s.ReloadMsg(query.ChatID)
+}
+
+type MenuReq struct {
+	ChatID int64
+}
+
+func (u *MenuReq) Update(s *Server) {
+	query := s.GetQuery(u.ChatID)
+	query.State = s.Tree.Next[query.Location]
+	s.ReloadMsg(query.ChatID)
+}
+
 func (s *Server) GetQuery(ChatID int64) *Query {
 	query, ok := s.Queries[ChatID]
 	if !ok {
