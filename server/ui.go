@@ -51,13 +51,14 @@ func (s *Server) GenerateButtons(query *Query) tgbotapi.InlineKeyboardMarkup {
 		}
 
 		if back := query.State.Prev; back != nil && back.Product.Name != "root" {
-			rows = append(rows, []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData(back.Product.Name, "change\n"+back.GetPath())})
+			rows = append(rows, []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("go back", "change\n"+back.GetPath())})
 		}
 
 		return tgbotapi.NewInlineKeyboardMarkup(rows...)
 	} else {
 		urlbutton := tgbotapi.NewInlineKeyboardButtonURL("OpenMap", fmt.Sprintf("https://scheduleuabot.web.app/#/?chatid=%v", query.ChatID))
-		// locbutton := tgbotapi.NewKeyboardButtonLocation("Give your Location");
+		//locbutton := tgbotapi.NewKeyboardButtonLocation("Give your Location")
+
 		rows := [][]tgbotapi.InlineKeyboardButton{[]tgbotapi.InlineKeyboardButton{urlbutton}}
 		return tgbotapi.NewInlineKeyboardMarkup(rows...)
 	}

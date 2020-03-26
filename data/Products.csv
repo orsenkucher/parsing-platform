@@ -1,13 +1,13 @@
 store name,product group,product,price
-Lotok,Lmilk,Milk1,1
-Lotok,Lmilk,Milk2,2
-Lotok,Lmilk,Milk3,3
-Lotok,Lmeet,Meet1,10
-Lotok,Lmeet,Meet2,20
-Lotok,Lmeet,Meet3,30
-Novus,Nmilk,Milk1,4
-Novus,Nmilk,Milk2,5
-Novus,Nmilk,Milk3,6
-Novus,Nmeet,Meet1,40
-Novus,Nmeet,Meet2,50
-Novus,Nmeet,Meet3,60
+Lotok,Молоко,Яготинстке,1
+Lotok,Молоко,Біла Лінія,2
+Lotok,Кефір,Яготинстке,3
+Lotok,Кефір,Біла Лінія,10
+Lotok,Кефір,Простоквашино,20
+Lotok,Яйця,Велетні,30
+Novus,Ковбаси,Брауншвейська,4
+Novus,Ковбаси,Московська,5
+Novus,М“ясо,Курка,6
+Novus,М“ясо,Свинина,40
+Novus,М“ясо,Говядина,50
+Novus,Сметана,Простоквашино,60

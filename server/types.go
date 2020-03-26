@@ -5,6 +5,11 @@ import (
 	"strconv"
 )
 
+type Location struct {
+	X float64
+	Y float64
+}
+
 type Product struct {
 	Name     string
 	Priority int
