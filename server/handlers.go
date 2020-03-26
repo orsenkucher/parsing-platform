@@ -15,6 +15,7 @@ type LocationReq struct {
 }
 
 func (s *Server) GetLocation(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Received location")
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
