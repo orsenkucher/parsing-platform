@@ -11,7 +11,7 @@ import (
 
 type LocationReq struct {
 	ChatID   string `json:"chatid"`
-	Location string `json:"location"`
+	Location uint64 `json:"location"`
 }
 
 func (s *Server) GetLocation(w http.ResponseWriter, r *http.Request) {
@@ -35,9 +35,14 @@ func (s *Server) GetLocation(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) GiveLocations(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Give locations")
-	data, err := json.Marshal(s.Locaitons)
+	locs := []*Location{}
+	for _, loc := range s.Locaitons {
+		locs = append(locs, loc)
+	}
+	data, err := json.Marshal(locs)
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println(string(data))
 	fmt.Fprint(w, string(data))
 }
