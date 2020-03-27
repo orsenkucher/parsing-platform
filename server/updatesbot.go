@@ -1,22 +1,25 @@
 package server
 
+import "strconv"
+
 type Update interface {
 	Update(s *Server)
 }
 
 type NewLocation struct {
-	Location string
+	Location uint64
 	ChatID   int64
 }
 
 func (u *NewLocation) Update(s *Server) {
-	if _, ok := s.Tree.Next[u.Location]; ok {
+	locname := strconv.FormatUint(u.Location, 10)
+	if _, ok := s.Tree.Next[locname]; ok {
 		_, ok := s.Queries[u.ChatID]
 		if !ok {
-			s.Queries[u.ChatID] = &Query{Location: u.Location, State: s.Tree.Next[u.Location], Purchases: []*Purchase{}, Sum: 0, ChatID: u.ChatID}
+			s.Queries[u.ChatID] = &Query{Location: s.Locaitons[u.Location].Name, State: s.Tree.Next[locname], Purchases: []*Purchase{}, Sum: 0, ChatID: u.ChatID}
 		} else {
-			s.Queries[u.ChatID].Location = u.Location
-			s.Queries[u.ChatID].State = s.Tree.Next[u.Location]
+			s.Queries[u.ChatID].Location = locname
+			s.Queries[u.ChatID].State = s.Tree.Next[locname]
 		}
 		s.ReloadMsg(u.ChatID)
 	} else {

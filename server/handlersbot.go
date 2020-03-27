@@ -2,14 +2,18 @@ package server
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 func (b *Bot) NewLocation(chatid int64, loc string) {
-	nl := &NewLocation{Location: loc, ChatID: chatid}
-	b.Updates <- nl
+	locid, err := strconv.ParseUint(loc, 10, 64)
+	if err == nil {
+		nl := &NewLocation{Location: locid, ChatID: chatid}
+		b.Updates <- nl
+	}
 }
 
 func (b *Bot) handleCallback(update tgbotapi.Update) {
