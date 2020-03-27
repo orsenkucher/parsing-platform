@@ -3,10 +3,11 @@
 // import 'dart:js';
 
 import 'dart:convert';
+// ignore: avoid_web_libraries_in_flutter
 import 'dart:js';
 import 'dart:math' as m;
 
-import 'package:fluro/fluro.dart';
+// import 'package:fluro/fluro.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart';
 import 'package:scoped_model/scoped_model.dart';
@@ -20,12 +21,40 @@ import 'package:google_maps/google_maps.dart' hide Icon;
 import 'dart:html';
 import 'dart:ui' as ui;
 
-void main() {
+import 'package:location/location.dart';
+
+void main() async {
   runApp(MyApp());
+
+  Location location = new Location();
+  bool _serviceEnabled;
+  PermissionStatus _permissionGranted;
+  LocationData _locationData;
+
+  _serviceEnabled = await location.serviceEnabled();
+  if (!_serviceEnabled) {
+    _serviceEnabled = await location.requestService();
+    if (!_serviceEnabled) {
+      return;
+    }
+  }
+
+  _permissionGranted = await location.hasPermission();
+  if (_permissionGranted == PermissionStatus.denied) {
+    _permissionGranted = await location.requestPermission();
+    if (_permissionGranted != PermissionStatus.granted) {
+      return;
+    }
+  }
+
+  _locationData = await location.getLocation();
+  print("LOCATION");
+  print(_locationData);
+  globalParams.updateLocation(_locationData);
 }
 
 ParamsModel globalParams = ParamsModel();
-final router = Router();
+// final router = Router();
 
 bool showingDialog = false;
 
@@ -33,8 +62,16 @@ class ParamsModel extends Model {
   String _chatid;
   String get chatid => _chatid;
 
-  void update(String s) {
+  LocationData _location;
+  LocationData get location => _location;
+
+  void updateChatid(String s) {
     _chatid = s;
+    notifyListeners();
+  }
+
+  void updateLocation(LocationData l) {
+    _location = l;
     notifyListeners();
   }
 
@@ -42,22 +79,35 @@ class ParamsModel extends Model {
       ScopedModel.of<ParamsModel>(context, rebuildOnChange: true);
 }
 
-class MyApp extends StatelessWidget {
-  var usersHandler =
-      Handler(handlerFunc: (BuildContext context, Map<String, dynamic> params) {
-    // return UsersScreen(params["id"][0]);
-    return MyHomePage();
-  });
-
-  void defineRoutes(Router router) {
-    router.define("/users/:id", handler: usersHandler);
-
-    // it is also possible to define the route transition to use
-    // router.define("users/:id", handler: usersHandler, transitionType: TransitionType.inFromLeft);
+extension LocationData$ on LocationData {
+  LatLng toLatLng() {
+    print("HELLO");
+    // if (this == null) return null;
+    return LatLng(this.latitude, this.longitude);
   }
+}
+
+class MyApp extends StatefulWidget {
+  // var usersHandler =
+  //     Handler(handlerFunc: (BuildContext context, Map<String, dynamic> params) {
+  //   // return UsersScreen(params["id"][0]);
+  //   return MyHomePage();
+  // });
+
+  // void defineRoutes(Router router) {
+  //   router.define("/users/:id", handler: usersHandler);
+
+  //   // it is also possible to define the route transition to use
+  //   // router.define("users/:id", handler: usersHandler, transitionType: TransitionType.inFromLeft);
+  // }
 
   // This widget is the root of your application.
   // var currentparams = <String, String>{};
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -72,8 +122,11 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         print("BUILDER");
 
-        return Container(
-          child: child,
+        return ScopedModel<ParamsModel>(
+          model: globalParams,
+          child: Container(
+            child: child,
+          ),
         );
       },
 
@@ -110,7 +163,7 @@ class MyApp extends StatelessWidget {
 
         // }
         if (params['chatid'] != null) {
-          globalParams.update(params['chatid']);
+          globalParams.updateChatid(params['chatid']);
         }
 
 // TODO
@@ -232,24 +285,26 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     print("BUILDER-2");
     return Scaffold(
-      body: Stack(
-        children: <Widget>[
-          // if (globalParams.chatid != null) _map(),
-          _map(context),
-          // _map2(),
-          _redirect(),
-          Align(
-            alignment: Alignment.topCenter,
-            child: Text(
-              globalParams.chatid ?? "none",
-              style: TextStyle(
-                backgroundColor: Colors.black.withOpacity(1),
-                color: Colors.red,
-                fontSize: 33,
+      body: ScopedModelDescendant<ParamsModel>(
+        builder: (context, child, model) => Stack(
+          children: <Widget>[
+            // if (globalParams.chatid != null) _map(),
+            _map(context, model),
+            // _map2(),
+            _redirect(),
+            Align(
+              alignment: Alignment.topCenter,
+              child: Text(
+                globalParams.chatid ?? "none",
+                style: TextStyle(
+                  backgroundColor: Colors.black.withOpacity(1),
+                  color: Colors.red,
+                  fontSize: 33,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -262,7 +317,7 @@ class MyHomePage extends StatelessWidget {
   //   );
   // }
 
-  Widget _map(BuildContext buildcontext) {
+  Widget _map(BuildContext buildcontext, ParamsModel model) {
     String htmlId = "71";
 
     // ignore: undefined_prefixed_name
@@ -274,11 +329,14 @@ class MyHomePage extends StatelessWidget {
 
       print("CHATID ${globalParams.chatid}");
       // print(widget.)
-
+      // TODO LOCATION
+      print("CENTER LOCATION======");
+      print(model.location?.toLatLng);
       final mapOptions = MapOptions()
-        ..zoom = globalParams.chatid == null ? 13 : 16
+        ..zoom = model.chatid == null ? 13 : 16
         ..clickableIcons = false
         ..disableDefaultUI = true
+
         // ..streetViewControl = false
         // ..zoomControl = false
         ..center = mc2;
@@ -319,13 +377,22 @@ class MyHomePage extends StatelessWidget {
       //   });
       // });
 
+      // const image =
+      //     'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
+
       final markers = <PosName>[
         PosName(name: "Lotok", pos: mc1),
         PosName(name: "Novus", pos: mc2)
       ].map((pn) => Marker(MarkerOptions()
         ..position = pn.pos
         ..map = map
-        ..label = pn.name
+        // ..label = pn.name
+        ..label = (MarkerLabel()
+          ..fontSize = "18px"
+          ..fontWeight = "bold"
+          ..text = pn.name)
+        // ..icon = image
+        ..optimized = false
         ..clickable = false //true
         ..title = pn.name));
 // Iterable.it
