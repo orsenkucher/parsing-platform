@@ -62,6 +62,14 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
     if (event is _GetLocations) {
       try {
         final servurl = 'http://34.89.201.1:9094';
+
+        // final resp = await http.get('$servurl/locations', headers: {
+        //   "Access-Control-Allow-Origin": "*",
+        //   "Access-Control-Allow-Credentials": "true",
+        //   "Access-Control-Allow-Headers":
+        //       "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+        //   "Access-Control-Allow-Methods": "POST, OPTIONS"
+        // });
         final resp = await http.get('$servurl/locations');
         print(resp.statusCode);
         if (resp.statusCode == 200) {
