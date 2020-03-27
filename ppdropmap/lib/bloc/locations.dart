@@ -75,7 +75,10 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
         if (resp.statusCode == 200) {
           final decoded = json.decode(resp.body);
           print(decoded);
-          yield LocationsState.some(Locations.fromJson(decoded));
+          // yield LocationsState.some(Locations.fromJson(decoded));
+          yield LocationsState.some(Locations((decoded as List<dynamic>)
+              .map((e) => Location.fromJson(e))
+              .toList()));
         }
       } on dynamic catch (err) {
         print('err: $err');

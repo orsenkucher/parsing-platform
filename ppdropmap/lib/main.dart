@@ -457,20 +457,27 @@ class MyHomePage extends StatelessWidget {
             return m / mpp;
           }
 
-          final title = markers
-              .firstWhere(
-                (m2) => pixels(latLng, m2.position) < 50.0,
-                orElse: () => null,
-              )
-              ?.title;
-          print(title);
-          if (title != null) {
+          // final title = markers
+          //     .firstWhere(
+          //       (m2) => pixels(latLng, m2.position) < 50.0,
+          //       orElse: () => null,
+          //     )
+          //     ?.title;
+          final clicked = locations.when(
+              some: (l) => l.locations.firstWhere(
+                  (l2) => pixels(latLng, LatLng(l2.lat, l2.lng)) < 50.0,
+                  orElse: () => null),
+              none: () => null);
+          print(clicked?.name);
+          print("CLICKED ID");
+          print(clicked?.id);
+          if (clicked != null) {
             showingDialog = true;
             showCupertinoDialog(
               context: buildcontext,
               builder: (context) => AlertDialog(
-                title: Text("Continue shopping in"),
-                content: Text(title),
+                title: Text("Continue shopping in ${clicked.name}"),
+                content: Text(clicked.adress),
                 // buttonPadding: EdgeInsets.all(24),
                 // Row(
                 //   children: [
@@ -505,7 +512,7 @@ class MyHomePage extends StatelessWidget {
                       final servurl = 'http://34.89.201.1:9094/';
                       final body = json.encode({
                         "chatid": globalParams.chatid,
-                        "location": title,
+                        "location": clicked.id,
                       });
                       print('body: $body');
                       try {

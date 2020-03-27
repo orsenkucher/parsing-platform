@@ -31,6 +31,8 @@ func (s *Server) GetLocation(w http.ResponseWriter, r *http.Request) {
 	fmt.Println()
 	fmt.Println(req.Location)
 	fmt.Println("uid: ", req.ChatID)
+	w.Header().Add("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(200)
 }
 
 func (s *Server) GiveLocations(w http.ResponseWriter, r *http.Request) {
