@@ -11,6 +11,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart';
 import 'package:ppdropmap/bloc/location.dart';
+import 'package:ppdropmap/bloc/locations.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_maps/google_maps.dart' hide Icon;
@@ -46,8 +47,11 @@ class ParamsModel extends Model {
 
 class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
-    return BlocProvider<LocationBloc>(
-      create: (_) => LocationBloc(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<LocationBloc>(create: (_) => LocationBloc()),
+        BlocProvider<LocationsBloc>(create: (_) => LocationsBloc()),
+      ],
       child: MaterialApp(
         title: 'pp-drop map',
         theme: ThemeData(
@@ -228,8 +232,12 @@ class MyHomePage extends StatelessWidget {
         builder: (context, child, model) => Stack(
           children: <Widget>[
             // if (globalParams.chatid != null) _map(),
-            BlocBuilder<LocationBloc, LocationState>(
-                builder: (context, state) => _map(context, state)),
+            BlocBuilder<LocationsBloc, LocationsState>(
+              builder: (context, locations) =>
+                  BlocBuilder<LocationBloc, LocationState>(
+                      builder: (context, userloc) =>
+                          _map(context, userloc, locations)),
+            ),
             // _map2(),
             _redirect(),
             Align(
@@ -258,7 +266,11 @@ class MyHomePage extends StatelessWidget {
   // }
 
   int previd = 71;
-  Widget _map(BuildContext buildcontext, LocationState loc) {
+  Widget _map(
+    BuildContext buildcontext,
+    LocationState userloc,
+    LocationsState locations,
+  ) {
     // String htmlId = "71";
     String htmlId = '${previd++}';
     print("REBUILDING");
@@ -274,7 +286,7 @@ class MyHomePage extends StatelessWidget {
       // TODO LOCATION
       print("CENTER LOCATION======");
       // print(model.location?.toLatLng);
-      print(loc.locationData);
+      print(userloc.locationData);
       final mapOptions = MapOptions()
         ..zoom = globalParams.chatid == null ? 13 : 16
         ..clickableIcons = false
@@ -282,7 +294,7 @@ class MyHomePage extends StatelessWidget {
 
         // ..streetViewControl = false
         // ..zoomControl = false
-        ..center = loc.locationData;
+        ..center = userloc.locationData;
 
       final elem = DivElement()
         ..id = htmlId
@@ -323,28 +335,35 @@ class MyHomePage extends StatelessWidget {
       // const image =
       //     'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
 
-      final markers = <PosName>[
-        PosName(name: "Lotok", pos: mc1),
-        PosName(name: "Novus", pos: mc2)
-      ].map((pn) => Marker(MarkerOptions()
-        ..position = pn.pos
-        ..map = map
-        // ..label = pn.name
-        ..label = (MarkerLabel()
-          ..fontSize = "18px"
-          ..fontWeight = "bold"
-          ..text = pn.name)
-        // ..icon = image
-        ..optimized = false
-        ..clickable = false //true
-        ..title = pn.name));
+      // final markers = <PosName>[
+      //   PosName(name: "Lotok", pos: mc1),
+      //   PosName(name: "Novus", pos: mc2)
+      // ]
+      var markers = Iterable<Marker>.empty();
+      locations.when(
+          some: (locations) {
+            final locs = locations.locations;
+            markers = locs.map((pn) => Marker(MarkerOptions()
+              ..position = LatLng(pn.lat, pn.lng)
+              ..map = map
+              // ..label = pn.name
+              ..label = (MarkerLabel()
+                ..fontSize = "18px"
+                ..fontWeight = "bold"
+                ..text = pn.name)
+              // ..icon = image
+              ..optimized = false
+              ..clickable = false //true
+              ..title = pn.name));
 // Iterable.it
-      final iter = markers.iterator;
-      while (iter.moveNext()) {
-        iter.current.addListener("click", () {
-          print("CLICK");
-        });
-      }
+            final iter = markers.iterator;
+            while (iter.moveNext()) {
+              iter.current.addListener("click", () {
+                print("CLICK");
+              });
+            }
+          },
+          none: () {});
       // .addListener("click", () {
       //     print(pn.name);
       //     final servurl = 'http://34.89.201.1:9094/';
