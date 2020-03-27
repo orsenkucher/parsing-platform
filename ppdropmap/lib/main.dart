@@ -1,61 +1,26 @@
-// import 'package:easy_google_maps/easy_google_maps.dart';
-// ignore: avoid_web_libraries_in_flutter
-// import 'dart:js';
-
 import 'dart:convert';
+import 'dart:math' as m;
+import 'dart:ui' as ui;
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:js';
-import 'dart:math' as m;
-
-// import 'package:fluro/fluro.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:http/http.dart';
-import 'package:scoped_model/scoped_model.dart';
-
-import 'package:flutter/material.dart';
-// import 'package:ppdropmap/locator.dart';
-import 'package:url_launcher/url_launcher.dart';
-
-import 'package:google_maps/google_maps.dart' hide Icon;
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html';
-import 'dart:ui' as ui;
 
+import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart';
+import 'package:ppdropmap/bloc/location.dart';
+import 'package:scoped_model/scoped_model.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:google_maps/google_maps.dart' hide Icon;
 import 'package:location/location.dart';
 
-void main() async {
+void main() {
   runApp(MyApp());
-
-  Location location = new Location();
-  bool _serviceEnabled;
-  PermissionStatus _permissionGranted;
-  LocationData _locationData;
-
-  _serviceEnabled = await location.serviceEnabled();
-  if (!_serviceEnabled) {
-    _serviceEnabled = await location.requestService();
-    if (!_serviceEnabled) {
-      return;
-    }
-  }
-
-  _permissionGranted = await location.hasPermission();
-  if (_permissionGranted == PermissionStatus.denied) {
-    _permissionGranted = await location.requestPermission();
-    if (_permissionGranted != PermissionStatus.granted) {
-      return;
-    }
-  }
-
-  _locationData = await location.getLocation();
-  print("LOCATION");
-  print(_locationData);
-  globalParams.updateLocation(_locationData);
 }
 
 ParamsModel globalParams = ParamsModel();
-// final router = Router();
-
 bool showingDialog = false;
 
 class ParamsModel extends Model {
@@ -79,154 +44,128 @@ class ParamsModel extends Model {
       ScopedModel.of<ParamsModel>(context, rebuildOnChange: true);
 }
 
-extension LocationData$ on LocationData {
-  LatLng toLatLng() {
-    print("HELLO");
-    // if (this == null) return null;
-    return LatLng(this.latitude, this.longitude);
-  }
-}
-
-class MyApp extends StatefulWidget {
-  // var usersHandler =
-  //     Handler(handlerFunc: (BuildContext context, Map<String, dynamic> params) {
-  //   // return UsersScreen(params["id"][0]);
-  //   return MyHomePage();
-  // });
-
-  // void defineRoutes(Router router) {
-  //   router.define("/users/:id", handler: usersHandler);
-
-  //   // it is also possible to define the route transition to use
-  //   // router.define("users/:id", handler: usersHandler, transitionType: TransitionType.inFromLeft);
-  // }
-
-  // This widget is the root of your application.
-  // var currentparams = <String, String>{};
-  @override
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  @override
+class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'pp-drop map',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      // initialRoute: '/',
-      // routes: {'/': (_) => MyHomePage()},
-      // navigatorKey: , // TODO
-      // navigatorKey: locator<NavigationService>().navigatorKey,
-      builder: (context, child) {
-        print("BUILDER");
+    return BlocProvider<LocationBloc>(
+      create: (_) => LocationBloc(),
+      child: MaterialApp(
+        title: 'pp-drop map',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        // initialRoute: '/',
+        // routes: {'/': (_) => MyHomePage()},
+        // navigatorKey: , // TODO
+        // navigatorKey: locator<NavigationService>().navigatorKey,
+        builder: (context, child) {
+          print("BUILDER");
 
-        return ScopedModel<ParamsModel>(
-          model: globalParams,
-          child: Container(
-            child: child,
-          ),
-        );
-      },
+          return ScopedModel<ParamsModel>(
+            model: globalParams,
+            child: Container(
+              child: child,
+            ),
+          );
+        },
 
-      // My url pattern: www.app.com/#/xLZppqzSiSxaFu4PB7Ui
-      onGenerateRoute: (settings) {
-        print(
-          "onUnknownRoute onUnknownRoute onUnknownRoute onUnknownRoute onUnknownRoute",
-        );
-        print("=========");
-        // print(settings);
-        // print('route: ' + settings.name);
-        // print(settings.arguments);
-        final uri = Uri.parse(settings.name);
-        print('uri: $uri');
+        // My url pattern: www.app.com/#/xLZppqzSiSxaFu4PB7Ui
+        onGenerateRoute: (settings) {
+          print(
+            "onUnknownRoute onUnknownRoute onUnknownRoute onUnknownRoute onUnknownRoute",
+          );
+          print("=========");
+          // print(settings);
+          // print('route: ' + settings.name);
+          // print(settings.arguments);
+          final uri = Uri.parse(settings.name);
+          print('uri: $uri');
 
-        // var params = <String, String>{};
-        // try {
-        //   params = uri?.queryParameters;
-        // } catch (_) {
-        //   print(_);
-        // }
-        final params = <String, String>{...uri.queryParameters};
-        // print(params);
-        params.forEach((k, v) {
-          print('-> $k: $v');
-        });
-        print(params['chatid']);
-        print(params['lat']);
-        print(params['lng']);
-        // print("=========");
+          // var params = <String, String>{};
+          // try {
+          //   params = uri?.queryParameters;
+          // } catch (_) {
+          //   print(_);
+          // }
+          final params = <String, String>{...uri.queryParameters};
+          // print(params);
+          params.forEach((k, v) {
+            print('-> $k: $v');
+          });
+          print(params['chatid']);
+          print(params['lat']);
+          print(params['lng']);
+          // print("=========");
 
-        // if (params.isNotEmpty) {
-        //   print("isNotEmpty");
+          // if (params.isNotEmpty) {
+          //   print("isNotEmpty");
 
-        // }
-        if (params['chatid'] != null) {
-          globalParams.updateChatid(params['chatid']);
-        }
+          // }
+          if (params['chatid'] != null) {
+            globalParams.updateChatid(params['chatid']);
+          }
 
 // TODO
-        // return PageRouteBuilder(
-        //     settings: settings,
-        //     pageBuilder: (context, _, __) => MyHomePage(
-        //           chatid: params['chatid'] ?? "sosi",
-        //           lat: params['lat'] != null
-        //               ? double.tryParse(params['lat'])
-        //               : null,
-        //           lng: params['lng'] != null
-        //               ? double.tryParse(params['lng'])
-        //               : null,
-        //         ));
-        // return MaterialPageRoute(
-        //     settings: settings,
-        //     maintainState: true,
-        //     builder: (context) {
-        //       print("PAGE ROUTE");
-        //       print(params.keys);
-        //       params.forEach((k, v) {
-        //         print('-> $k: $v');
-        //       });
-        //       print(params['chatid']);
-        //       print("*****");
-        //       final kek = MyHomePage(
-        //         key: UniqueKey(),
-        //         chatid: params['chatid'] ?? "sosi",
-        //         lat: params['lat'] != null
-        //             ? double.tryParse(params['lat'])
-        //             : null,
-        //         lng: params['lng'] != null
-        //             ? double.tryParse(params['lng'])
-        //             : null,
-        //       );
-        //       print(kek.chatid);
-        //       print(params['chatid']);
-        //       print("^^^^^^^^^^^^^^^^^");
-        //       return kek;
-        //     });
-        return MaterialPageRoute(
-          settings: settings,
-          maintainState: true,
-          builder: (context) => MyHomePage(),
-        );
-        // List<String> pathComponents = settings.name.split('/');
-        // if (pathComponents[1] == 'invoice') {
-        //   return MaterialPageRoute(
-        //     builder: (context) {
-        //       // return Invoice(arguments: pathComponents.last);
-        //       return Placeholder();
-        //     },
-        //   );
-        // } else {
-        //   return MaterialPageRoute(
-        //     builder: (context) {
-        //       // return LandingPage();
-        //       return Placeholder();
-        //     },
-        //   );
-        // }
-      },
-      debugShowCheckedModeBanner: false,
+          // return PageRouteBuilder(
+          //     settings: settings,
+          //     pageBuilder: (context, _, __) => MyHomePage(
+          //           chatid: params['chatid'] ?? "sosi",
+          //           lat: params['lat'] != null
+          //               ? double.tryParse(params['lat'])
+          //               : null,
+          //           lng: params['lng'] != null
+          //               ? double.tryParse(params['lng'])
+          //               : null,
+          //         ));
+          // return MaterialPageRoute(
+          //     settings: settings,
+          //     maintainState: true,
+          //     builder: (context) {
+          //       print("PAGE ROUTE");
+          //       print(params.keys);
+          //       params.forEach((k, v) {
+          //         print('-> $k: $v');
+          //       });
+          //       print(params['chatid']);
+          //       print("*****");
+          //       final kek = MyHomePage(
+          //         key: UniqueKey(),
+          //         chatid: params['chatid'] ?? "sosi",
+          //         lat: params['lat'] != null
+          //             ? double.tryParse(params['lat'])
+          //             : null,
+          //         lng: params['lng'] != null
+          //             ? double.tryParse(params['lng'])
+          //             : null,
+          //       );
+          //       print(kek.chatid);
+          //       print(params['chatid']);
+          //       print("^^^^^^^^^^^^^^^^^");
+          //       return kek;
+          //     });
+          return MaterialPageRoute(
+            settings: settings,
+            maintainState: true,
+            builder: (context) => MyHomePage(),
+          );
+          // List<String> pathComponents = settings.name.split('/');
+          // if (pathComponents[1] == 'invoice') {
+          //   return MaterialPageRoute(
+          //     builder: (context) {
+          //       // return Invoice(arguments: pathComponents.last);
+          //       return Placeholder();
+          //     },
+          //   );
+          // } else {
+          //   return MaterialPageRoute(
+          //     builder: (context) {
+          //       // return LandingPage();
+          //       return Placeholder();
+          //     },
+          //   );
+          // }
+        },
+        debugShowCheckedModeBanner: false,
+      ),
     );
   }
 }
@@ -289,7 +228,8 @@ class MyHomePage extends StatelessWidget {
         builder: (context, child, model) => Stack(
           children: <Widget>[
             // if (globalParams.chatid != null) _map(),
-            _map(context, model),
+            BlocBuilder<LocationBloc, LocationState>(
+                builder: (context, state) => _map(context, state)),
             // _map2(),
             _redirect(),
             Align(
@@ -317,9 +257,11 @@ class MyHomePage extends StatelessWidget {
   //   );
   // }
 
-  Widget _map(BuildContext buildcontext, ParamsModel model) {
-    String htmlId = "71";
-
+  int previd = 71;
+  Widget _map(BuildContext buildcontext, LocationState loc) {
+    // String htmlId = "71";
+    String htmlId = '${previd++}';
+    print("REBUILDING");
     // ignore: undefined_prefixed_name
     ui.platformViewRegistry.registerViewFactory(htmlId, (int viewId) {
       print("VIEW ID: $viewId");
@@ -331,15 +273,16 @@ class MyHomePage extends StatelessWidget {
       // print(widget.)
       // TODO LOCATION
       print("CENTER LOCATION======");
-      print(model.location?.toLatLng);
+      // print(model.location?.toLatLng);
+      print(loc.locationData);
       final mapOptions = MapOptions()
-        ..zoom = model.chatid == null ? 13 : 16
+        ..zoom = globalParams.chatid == null ? 13 : 16
         ..clickableIcons = false
         ..disableDefaultUI = true
 
         // ..streetViewControl = false
         // ..zoomControl = false
-        ..center = mc2;
+        ..center = loc.locationData;
 
       final elem = DivElement()
         ..id = htmlId
@@ -593,7 +536,8 @@ class MyHomePage extends StatelessWidget {
       return elem;
     });
 
-    return HtmlElementView(viewType: htmlId);
+// TODO return HTML Element
+    return HtmlElementView(key: UniqueKey(), viewType: htmlId);
   }
 
   Widget _redirect() {
