@@ -21,7 +21,7 @@ func (s *Server) LoadData() {
 		}
 	}
 	for id, loc := range s.Locaitons {
-		fmt.Println(id, " ", loc.Adress, " ", loc.Lat, " ", loc.Long)
+		fmt.Println(id, " ", loc.Adress, " ", loc.Lat, " ", loc.Lng)
 	}
 }
 
@@ -45,7 +45,7 @@ func (s *Server) AddLocation(line *string, netid uint64) {
 	if err != nil {
 		fmt.Println("location from file err:", err)
 	}
-	location := Location{ID: id, Lat: lat, Long: long, Name: parts[1], Adress: parts[2]}
+	location := Location{ID: id, Lat: lat, Lng: long, Name: parts[1], Adress: parts[2]}
 	s.Locaitons[location.ID] = &location
 }
 

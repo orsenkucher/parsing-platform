@@ -20,7 +20,7 @@ type Purchase struct {
 type Location struct {
 	ID     uint64  `json:"id"`
 	Lat    float64 `json:"lat"`
-	Long   float64 `json:"long"`
+	Lng    float64 `json:"lng"`
 	Name   string  `json:"name"`
 	Adress string  `json:"adress"`
 }
