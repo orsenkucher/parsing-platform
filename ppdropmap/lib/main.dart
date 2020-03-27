@@ -325,6 +325,7 @@ class MyHomePage extends StatelessWidget {
       ].map((pn) => Marker(MarkerOptions()
         ..position = pn.pos
         ..map = map
+        ..label = pn.name
         ..clickable = false //true
         ..title = pn.name));
 // Iterable.it
@@ -463,7 +464,10 @@ class MyHomePage extends StatelessWidget {
                     child: Text("No"),
                     onPressed: () {
                       Navigator.pop(context);
-                      showingDialog = false;
+                      Future.delayed(
+                        Duration(milliseconds: 200),
+                        () => showingDialog = false,
+                      );
                     },
                   ),
                   CupertinoButton.filled(
@@ -482,7 +486,10 @@ class MyHomePage extends StatelessWidget {
                         print('err: $err');
                       }
                       Navigator.pop(context);
-                      showingDialog = false;
+                      Future.delayed(
+                        Duration(milliseconds: 200),
+                        () => showingDialog = false,
+                      );
                       print("NAJALOS");
                       _onPressed();
                     },
