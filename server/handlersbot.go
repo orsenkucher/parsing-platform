@@ -13,6 +13,9 @@ func (b *Bot) NewLocation(chatid int64, loc string) {
 	if err == nil {
 		nl := &NewLocation{Location: locid, ChatID: chatid}
 		b.Updates <- nl
+	} else {
+		nl := &NewLocation{Location: 0, ChatID: chatid}
+		b.Updates <- nl
 	}
 }
 
