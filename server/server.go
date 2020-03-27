@@ -12,10 +12,11 @@ import (
 )
 
 type Server struct {
-	Bot     *Bot
-	Queries map[int64]*Query
-	Updates chan Update
-	Tree    *ProdTree
+	Bot       *Bot
+	Queries   map[int64]*Query
+	Updates   chan Update
+	Tree      *ProdTree
+	Locaitons map[uint64]*Location
 }
 
 func (s *Server) Listen() {
@@ -27,11 +28,16 @@ func (s *Server) Listen() {
 }
 
 func StartServer(bot *Bot) {
-	s := Server{Bot: bot, Queries: make(map[int64]*Query), Updates: make(chan Update), Tree: GenerateTree()}
+	s := Server{Bot: bot, Queries: make(map[int64]*Query), Locaitons: make(map[uint64]*Location), Updates: make(chan Update), Tree: GenerateTree()}
+	s.LoadData()
+	for store := range s.Tree.Next {
+		fmt.Println(store)
+	}
 	s.Bot.Updates = s.Updates
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	http.HandleFunc("/", s.GetLocation)
+	http.HandleFunc("/locations", s.GiveLocations)
 	hsrv := &http.Server{
 		Addr:    ":9094",
 		Handler: nil, // use default mux

@@ -42,7 +42,7 @@ func (s *Server) ReloadButtons(query *Query) tgbotapi.InlineKeyboardMarkup {
 		rows := [][]tgbotapi.InlineKeyboardButton{}
 		for _, node := range nodes {
 			text := node.Product.Name
-			path := node.GetPath()
+			path := node.GetHash()
 			if len(node.Next) > 0 {
 				button := tgbotapi.NewInlineKeyboardButtonData(text, "change\n"+path)
 				rows = append(rows, []tgbotapi.InlineKeyboardButton{button})
@@ -65,13 +65,13 @@ func (s *Server) ReloadButtons(query *Query) tgbotapi.InlineKeyboardMarkup {
 
 		if back := query.State.Prev; back != nil && back.Product.Name != "root" {
 			//if back := query.State.Prev; back != nil {
-			rows = append(rows, []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("go back", "change\n"+back.GetPath())})
+			rows = append(rows, []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("go back", "change\n"+back.GetHash())})
 		}
 		rows = append(rows, LowButtoms(query))
 
 		return tgbotapi.NewInlineKeyboardMarkup(rows...)
 	} else {
-		urlbutton := tgbotapi.NewInlineKeyboardButtonURL("OpenMap", fmt.Sprintf("http://34.89.201.1:5000/#?chatid=%v", query.ChatID))
+		urlbutton := tgbotapi.NewInlineKeyboardButtonURL("🗺 OpenMap", fmt.Sprintf("http://34.89.201.1:5000/#?chatid=%v", query.ChatID))
 		//locbutton := tgbotapi.NewKeyboardButtonLocation("Give your Location")
 
 		rows := [][]tgbotapi.InlineKeyboardButton{[]tgbotapi.InlineKeyboardButton{urlbutton}}
@@ -110,7 +110,7 @@ func (s *Server) ShowBasketButtons(query *Query) tgbotapi.InlineKeyboardMarkup {
 		rows := [][]tgbotapi.InlineKeyboardButton{}
 		for _, node := range nodes {
 			text := node.Product.Product.Name
-			path := node.Product.GetPath()
+			path := node.Product.GetHash()
 			button := tgbotapi.NewInlineKeyboardButtonData(text+" "+strconv.FormatFloat(node.Product.Product.Price, 'f', 2, 64), "\n"+path)
 			addButton := tgbotapi.NewInlineKeyboardButtonData("+", "add\n"+path)
 			subButton := tgbotapi.NewInlineKeyboardButtonData("-", "sub\n"+path)
@@ -128,7 +128,7 @@ func (s *Server) ShowBasketButtons(query *Query) tgbotapi.InlineKeyboardMarkup {
 
 		return tgbotapi.NewInlineKeyboardMarkup(rows...)
 	} else {
-		urlbutton := tgbotapi.NewInlineKeyboardButtonURL("OpenMap", fmt.Sprintf("http://34.89.201.1:5000/#?chatid=%v", query.ChatID))
+		urlbutton := tgbotapi.NewInlineKeyboardButtonURL("🗺 OpenMap", fmt.Sprintf("http://34.89.201.1:5000/#?chatid=%v", query.ChatID))
 		//locbutton := tgbotapi.NewKeyboardButtonLocation("Give your Location")
 
 		rows := [][]tgbotapi.InlineKeyboardButton{[]tgbotapi.InlineKeyboardButton{urlbutton}}
@@ -138,7 +138,7 @@ func (s *Server) ShowBasketButtons(query *Query) tgbotapi.InlineKeyboardMarkup {
 
 func LowButtoms(q *Query) []tgbotapi.InlineKeyboardButton {
 	menu := tgbotapi.NewInlineKeyboardButtonData("🏠", "menu\n")
-	location := tgbotapi.NewInlineKeyboardButtonData("📍", "reset\n")
+	location := tgbotapi.NewInlineKeyboardButtonData("🗺", "reset\n")
 	basket := tgbotapi.NewInlineKeyboardButtonData("🧺 "+strconv.FormatFloat(q.Sum, 'f', 2, 64), "basket\n")
 	return []tgbotapi.InlineKeyboardButton{menu, location, basket}
 }

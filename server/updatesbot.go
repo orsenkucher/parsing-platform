@@ -1,5 +1,7 @@
 package server
 
+import "strconv"
+
 type Update interface {
 	Update(s *Server)
 }
@@ -13,7 +15,8 @@ func (u *NewLocation) Update(s *Server) {
 	if _, ok := s.Tree.Next[u.Location]; ok {
 		_, ok := s.Queries[u.ChatID]
 		if !ok {
-			s.Queries[u.ChatID] = &Query{Location: u.Location, State: s.Tree.Next[u.Location], Purchases: []*Purchase{}, Sum: 0, ChatID: u.ChatID}
+			locid, _ := strconv.ParseUint(u.Location, 10, 64)
+			s.Queries[u.ChatID] = &Query{Location: s.Locaitons[locid].Name, State: s.Tree.Next[u.Location], Purchases: []*Purchase{}, Sum: 0, ChatID: u.ChatID}
 		} else {
 			s.Queries[u.ChatID].Location = u.Location
 			s.Queries[u.ChatID].State = s.Tree.Next[u.Location]

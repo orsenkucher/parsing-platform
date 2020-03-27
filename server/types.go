@@ -8,12 +8,21 @@ import (
 type Product struct {
 	Name     string
 	Priority int
+	ID       int
 	Price    float64
 }
 
 type Purchase struct {
 	Product *ProdTree
 	Count   int
+}
+
+type Location struct {
+	ID     uint64  `json:"id"`
+	Lat    float64 `json:"lat"`
+	Long   float64 `json:"long"`
+	Name   string  `json:"name"`
+	Adress string  `json:"adress"`
 }
 
 type Query struct {

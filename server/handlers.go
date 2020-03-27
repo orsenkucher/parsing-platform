@@ -32,3 +32,12 @@ func (s *Server) GetLocation(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(req.Location)
 	fmt.Println("uid: ", req.ChatID)
 }
+
+func (s *Server) GiveLocations(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Give locations")
+	data, err := json.Marshal(s.Locaitons)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Fprint(w, string(data))
+}
