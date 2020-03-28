@@ -11,7 +11,9 @@ func main() {
 	var s = flag.String("s", "", "provide encio password")
 	flag.Parse()
 	key := encio.NewEncIO(*s)
-	bot := server.NewBot(key)
+	bot := server.NewBot(key, "server/bot.json")
+	admin := server.NewBot(key, "server/admin.bot.json")
 	go bot.Listen()
-	server.StartServer(bot)
+	go admin.Listen()
+	server.StartServer(bot, admin)
 }

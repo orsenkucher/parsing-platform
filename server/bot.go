@@ -16,15 +16,21 @@ type Bot struct {
 	Updates  chan Update
 }
 
-func NewBot(key encio.EncIO) *Bot {
-	cfg, err := key.GetConfig("server/bot.json")
+func NewBot(key encio.EncIO, cfgPath string) *Bot {
+	fmt.Println("============CFG============")
+	cfg := botCfg(key, cfgPath)
+	fmt.Println(cfg)
+	bot := Bot{cfg: cfg}
+	bot.initAPI()
+	return &bot
+}
+
+func botCfg(key encio.EncIO, path string) encio.Config {
+	cfg, err := key.GetConfig(path)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println(cfg)
-	b := Bot{cfg: cfg}
-	b.initAPI()
-	return &b
+	return cfg
 }
 
 func (b *Bot) initAPI() {

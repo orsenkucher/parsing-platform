@@ -13,6 +13,7 @@ import (
 
 type Server struct {
 	Bot       *Bot
+	Admin     *Bot
 	Queries   map[int64]*Query
 	Updates   chan Update
 	Tree      *ProdTree
@@ -27,7 +28,7 @@ func (s *Server) Listen() {
 	}
 }
 
-func StartServer(bot *Bot) {
+func StartServer(bot *Bot, admin *Bot) {
 	s := Server{Bot: bot, Queries: make(map[int64]*Query), Locaitons: make(map[uint64]*Location), Updates: make(chan Update), Tree: GenerateTree()}
 	s.LoadData()
 	for store := range s.Tree.Next {
