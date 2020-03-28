@@ -1,4 +1,4 @@
-package server
+package ppdrop
 
 import (
 	"fmt"
