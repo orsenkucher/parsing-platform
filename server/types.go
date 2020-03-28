@@ -25,7 +25,7 @@ type Location struct {
 	Adress string  `json:"adress"`
 }
 
-type Query struct {
+type UsersState struct {
 	State     *ProdTree
 	Location  string
 	Purchases []*Purchase
@@ -33,7 +33,7 @@ type Query struct {
 	ChatID    int64
 }
 
-func (q *Query) ToString() string {
+func (q *UsersState) ToString() string {
 	fmt.Println()
 	str := ""
 	for _, p := range q.Purchases {

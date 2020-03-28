@@ -14,12 +14,12 @@ type NewLocation struct {
 func (u *NewLocation) Update(s *Server) {
 	locname := strconv.FormatUint(u.Location, 10)
 	if _, ok := s.Tree.Next[locname]; ok {
-		_, ok := s.Queries[u.ChatID]
+		_, ok := s.UsersStates[u.ChatID]
 		if !ok {
-			s.Queries[u.ChatID] = &Query{Location: s.Locaitons[u.Location].Name, State: s.Tree.Next[locname], Purchases: []*Purchase{}, Sum: 0, ChatID: u.ChatID}
+			s.UsersStates[u.ChatID] = &UsersState{Location: s.Locaitons[u.Location].Name, State: s.Tree.Next[locname], Purchases: []*Purchase{}, Sum: 0, ChatID: u.ChatID}
 		} else {
-			s.Queries[u.ChatID].Location = locname
-			s.Queries[u.ChatID].State = s.Tree.Next[locname]
+			s.UsersStates[u.ChatID].Location = locname
+			s.UsersStates[u.ChatID].State = s.Tree.Next[locname]
 		}
 		s.ReloadMsg(u.ChatID)
 	} else {
@@ -107,15 +107,15 @@ type Reset struct {
 }
 
 func (u *Reset) Update(s *Server) {
-	delete(s.Queries, u.ChatID)
+	delete(s.UsersStates, u.ChatID)
 	s.ReloadMsg(u.ChatID)
 }
 
-func (s *Server) GetQuery(ChatID int64) *Query {
-	query, ok := s.Queries[ChatID]
+func (s *Server) GetQuery(ChatID int64) *UsersState {
+	query, ok := s.UsersStates[ChatID]
 	if !ok {
-		query = &Query{Location: "", State: s.Tree, Purchases: []*Purchase{}, Sum: 0, ChatID: ChatID}
-		s.Queries[ChatID] = query
+		query = &UsersState{Location: "", State: s.Tree, Purchases: []*Purchase{}, Sum: 0, ChatID: ChatID}
+		s.UsersStates[ChatID] = query
 	}
 	return query
 }

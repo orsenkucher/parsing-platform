@@ -27,7 +27,7 @@ func (s *Server) ReloadMsg(ChatID int64) {
 	}
 }
 
-func (s *Server) ReloadButtons(query *Query) tgbotapi.InlineKeyboardMarkup {
+func (s *Server) ReloadButtons(query *UsersState) tgbotapi.InlineKeyboardMarkup {
 	fmt.Println(query.State.Product.Name)
 	if query.State != s.Tree {
 		nodes := make([]*ProdTree, 0, len(query.State.Next)+1)
@@ -79,7 +79,7 @@ func (s *Server) ReloadButtons(query *Query) tgbotapi.InlineKeyboardMarkup {
 	}
 }
 
-func (s *Server) ShowBasket(query *Query) {
+func (s *Server) ShowBasket(query *UsersState) {
 	var tgmsg tgbotapi.MessageConfig
 	if query.State != s.Tree {
 		text := "-------------------------------------\n" + query.Location + "\n" + query.ToString()
@@ -93,7 +93,7 @@ func (s *Server) ShowBasket(query *Query) {
 	s.Bot.UpdateMsg(tgmsg)
 }
 
-func (s *Server) ShowBasketButtons(query *Query) tgbotapi.InlineKeyboardMarkup {
+func (s *Server) ShowBasketButtons(query *UsersState) tgbotapi.InlineKeyboardMarkup {
 	fmt.Println("basket")
 	if query.State != s.Tree {
 		nodes := make([]*Purchase, 0, len(query.Purchases))
@@ -136,7 +136,7 @@ func (s *Server) ShowBasketButtons(query *Query) tgbotapi.InlineKeyboardMarkup {
 	}
 }
 
-func LowButtoms(q *Query) []tgbotapi.InlineKeyboardButton {
+func LowButtoms(q *UsersState) []tgbotapi.InlineKeyboardButton {
 	menu := tgbotapi.NewInlineKeyboardButtonData("🏠", "menu\n")
 	location := tgbotapi.NewInlineKeyboardButtonData("🗺", "reset\n")
 	basket := tgbotapi.NewInlineKeyboardButtonData("🧺 "+strconv.FormatFloat(q.Sum, 'f', 2, 64), "basket\n")

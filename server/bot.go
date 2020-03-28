@@ -74,13 +74,6 @@ func (b *Bot) Listen() {
 			}
 			b.NewLocation(update.Message.Chat.ID, update.Message.Text)
 
-			// msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-
-			// b.UpdateMsg(msg)
-			// if err != nil {
-			// 	fmt.Println(err)
-			// }
-
 			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 			continue
 		}

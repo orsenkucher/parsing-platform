@@ -12,24 +12,23 @@ import (
 )
 
 type Server struct {
-	Bot       *Bot
-	Admin     *Bot
-	Queries   map[int64]*Query
-	Updates   chan Update
-	Tree      *ProdTree
-	Locaitons map[uint64]*Location
+	Bot         *Bot
+	Admin       *Bot
+	UsersStates map[int64]*UsersState
+	Updates     chan Update
+	Tree        *ProdTree
+	Locaitons   map[uint64]*Location
 }
 
 func (s *Server) Listen() {
 	for {
-		fmt.Print("wait")
 		upd := <-s.Updates
 		upd.Update(s)
 	}
 }
 
 func StartServer(bot *Bot, admin *Bot) {
-	s := Server{Bot: bot, Queries: make(map[int64]*Query), Locaitons: make(map[uint64]*Location), Updates: make(chan Update), Tree: GenerateTree()}
+	s := Server{Bot: bot, UsersStates: make(map[int64]*UsersState), Locaitons: make(map[uint64]*Location), Updates: make(chan Update), Tree: GenerateTree()}
 	s.LoadData()
 	for store := range s.Tree.Next {
 		fmt.Println(store)
