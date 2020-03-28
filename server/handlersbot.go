@@ -41,4 +41,8 @@ func (b *Bot) handleCallback(update tgbotapi.Update) {
 	if data[0] == "reset" {
 		b.Updates <- &Reset{ChatID: ChatID}
 	}
+	_, err := b.api.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, ""))
+	if err != nil {
+		fmt.Println("Callback: ", err)
+	}
 }
