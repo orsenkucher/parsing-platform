@@ -67,7 +67,7 @@ func (s *Server) ReloadButtons(query *UsersState) tgbotapi.InlineKeyboardMarkup 
 			//if back := query.State.Prev; back != nil {
 			rows = append(rows, []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("go back", "change\n"+back.GetHash())})
 		}
-		rows = append(rows, LowButtoms(query))
+		rows = append(rows, LowButtons(query))
 
 		return tgbotapi.NewInlineKeyboardMarkup(rows...)
 	} else {
@@ -124,7 +124,7 @@ func (s *Server) ShowBasketButtons(query *UsersState) tgbotapi.InlineKeyboardMar
 			rows = append(rows, []tgbotapi.InlineKeyboardButton{button})
 			rows = append(rows, []tgbotapi.InlineKeyboardButton{subButton, countButton, addButton})
 		}
-		rows = append(rows, LowButtoms(query))
+		rows = append(rows, LowButtons(query))
 
 		return tgbotapi.NewInlineKeyboardMarkup(rows...)
 	} else {
@@ -136,7 +136,7 @@ func (s *Server) ShowBasketButtons(query *UsersState) tgbotapi.InlineKeyboardMar
 	}
 }
 
-func LowButtoms(q *UsersState) []tgbotapi.InlineKeyboardButton {
+func LowButtons(q *UsersState) []tgbotapi.InlineKeyboardButton {
 	menu := tgbotapi.NewInlineKeyboardButtonData("🏠", "menu\n")
 	location := tgbotapi.NewInlineKeyboardButtonData("🗺", "reset\n")
 	basket := tgbotapi.NewInlineKeyboardButtonData("🧺 "+strconv.FormatFloat(q.Sum, 'f', 2, 64), "basket\n")
