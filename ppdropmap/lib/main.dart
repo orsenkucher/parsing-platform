@@ -17,6 +17,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:google_maps/google_maps.dart' hide Icon;
 import 'package:location/location.dart';
 
+const servurl = 'http://95.217.131.177:9094/';
+
 void main() {
   runApp(MyApp());
 }
@@ -509,7 +511,6 @@ class MyHomePage extends StatelessWidget {
                   CupertinoButton.filled(
                     child: Text("Yes"),
                     onPressed: () {
-                      final servurl = 'http://34.89.201.1:9094/';
                       final body = json.encode({
                         "chatid": globalParams.chatid,
                         "location": clicked.id,

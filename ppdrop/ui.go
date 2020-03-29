@@ -71,7 +71,7 @@ func (s *Server) ReloadButtons(query *UsersState) tgbotapi.InlineKeyboardMarkup 
 
 		return tgbotapi.NewInlineKeyboardMarkup(rows...)
 	} else {
-		urlbutton := tgbotapi.NewInlineKeyboardButtonURL("🗺 OpenMap", fmt.Sprintf("http://34.89.201.1:5000/#?chatid=%v", query.ChatID))
+		urlbutton := tgbotapi.NewInlineKeyboardButtonURL("🗺 OpenMap", fmt.Sprintf("http://95.217.131.177:5000/#?chatid=%v", query.ChatID))
 		//locbutton := tgbotapi.NewKeyboardButtonLocation("Give your Location")
 
 		rows := [][]tgbotapi.InlineKeyboardButton{[]tgbotapi.InlineKeyboardButton{urlbutton}}
@@ -128,7 +128,7 @@ func (s *Server) ShowBasketButtons(query *UsersState) tgbotapi.InlineKeyboardMar
 
 		return tgbotapi.NewInlineKeyboardMarkup(rows...)
 	} else {
-		urlbutton := tgbotapi.NewInlineKeyboardButtonURL("🗺 OpenMap", fmt.Sprintf("http://34.89.201.1:5000/#?chatid=%v", query.ChatID))
+		urlbutton := tgbotapi.NewInlineKeyboardButtonURL("🗺 OpenMap", fmt.Sprintf("http://95.217.131.177:5000/#?chatid=%v", query.ChatID))
 		//locbutton := tgbotapi.NewKeyboardButtonLocation("Give your Location")
 
 		rows := [][]tgbotapi.InlineKeyboardButton{[]tgbotapi.InlineKeyboardButton{urlbutton}}

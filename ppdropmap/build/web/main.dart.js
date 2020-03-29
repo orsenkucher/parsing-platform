@@ -38258,33 +38258,32 @@ case 1:p=c
 t=q}while(true)switch(t){case 0:t=u.fZ.c(a)?3:4
 break
 case 3:q=6
-n="http://34.89.201.1:9094"
 t=9
-return P.e0(G.a5N(H.a(n)+"/locations"),$async$f8,s)
-case 9:m=c
-P.aj(m.b)
-t=m.b===200?10:11
+return P.e0(G.a5N("http://95.217.131.177:9094/locations"),$async$f8,s)
+case 9:n=c
+P.aj(n.b)
+t=n.b===200?10:11
 break
-case 10:j=m
-l=C.av.d2(0,B.a5G(J.Q(U.a4o(j.e).c.a,"charset")).d2(0,j.x))
-P.aj(l)
+case 10:k=n
+m=C.av.d2(0,B.a5G(J.Q(U.a4o(k.e).c.a,"charset")).d2(0,k.x))
+P.aj(m)
 t=12
 r=[1]
-return P.e0(P.Y0(new N.zK(new N.zI(J.nb(u.j.a(l),new N.IK(),u.r8).aN(0)))),$async$f8,s)
+return P.e0(P.Y0(new N.zK(new N.zI(J.nb(u.j.a(m),new N.IK(),u.r8).aN(0)))),$async$f8,s)
 case 12:case 11:q=2
 t=8
 break
 case 6:q=5
-h=p
-k=H.L(h)
-P.aj("err: "+H.a(k))
+i=p
+l=H.L(i)
+P.aj("err: "+H.a(l))
 t=8
 break
 case 5:t=2
 break
 case 8:case 4:case 1:return P.e0(null,0,s)
 case 2:return P.e0(p,1,s)}})
-var t=0,s=P.UZ($async$f8,u.tB),r,q=2,p,o=[],n,m,l,k,j,i,h
+var t=0,s=P.UZ($async$f8,u.tB),r,q=2,p,o=[],n,m,l,k,j,i
 return P.V0(s)}}
 N.IK.prototype={
 $1:function(a){var t,s=J.a1(a),r=H.bQ(s.i(a,"id")),q=H.YH(s.i(a,"lat"))
@@ -38591,9 +38590,9 @@ F.Jw.prototype={
 $0:function(){return $.T5=!1},
 $S:32}
 F.Jy.prototype={
-$0:function(){var t,s,r,q="http://34.89.201.1:9094/",p=C.av.el(P.aV(["chatid",$.kk().d,"location",this.b.a],u.N,u.K))
-P.aj("body: "+H.a(p))
-try{G.a6d(q,p).br(new F.Ju(),u.H)}catch(s){t=H.L(s)
+$0:function(){var t,s,r,q=C.av.el(P.aV(["chatid",$.kk().d,"location",this.b.a],u.N,u.K))
+P.aj("body: "+H.a(q))
+try{G.a6d("http://95.217.131.177:9094/",q).br(new F.Ju(),u.H)}catch(s){t=H.L(s)
 P.aj("err: "+H.a(t))}r=this.c.q8(u.iK)
 r.rg(null)
 P.TF(P.dD(0,200),new F.Jv(),u.y)

@@ -10,6 +10,8 @@ import 'package:bloc/bloc.dart';
 part 'locations.freezed.dart';
 part 'locations.g.dart';
 
+const servurl = 'http://95.217.131.177:9094';
+
 @freezed
 abstract class Location with _$Location {
   const factory Location(
@@ -61,8 +63,6 @@ class LocationsBloc extends Bloc<LocationsEvent, LocationsState> {
     // TODO(FetchLocations)
     if (event is _GetLocations) {
       try {
-        final servurl = 'http://34.89.201.1:9094';
-
         // final resp = await http.get('$servurl/locations', headers: {
         //   "Access-Control-Allow-Origin": "*",
         //   "Access-Control-Allow-Credentials": "true",
