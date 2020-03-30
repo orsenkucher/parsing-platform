@@ -2,6 +2,7 @@ package ppdrop
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -44,7 +45,7 @@ func (state *UsersState) HomeBtm() tgbotapi.InlineKeyboardMarkup {
 
 	for _, basket := range state.Baskets {
 		locstr := strconv.FormatUint(basket.Location, 10)
-		button := tgbotapi.NewInlineKeyboardButtonData(Locations[basket.Location].Name, "basket\n"+locstr)
+		button := tgbotapi.NewInlineKeyboardButtonData(Locations[basket.Location].Name, "location\n"+locstr)
 		rows = append(rows, []tgbotapi.InlineKeyboardButton{button})
 	}
 
@@ -84,6 +85,9 @@ func (state *UsersState) TreeBtm() tgbotapi.InlineKeyboardMarkup {
 }
 
 func (state *UsersState) productButtons(products []*ProdTree) [][]tgbotapi.InlineKeyboardButton {
+	sort.Slice(products, func(i, j int) bool {
+		return products[i].Product.Priority < products[j].Product.Priority
+	})
 	rows := [][]tgbotapi.InlineKeyboardButton{}
 	basket := state.Baskets[state.Current]
 	for _, node := range products {
@@ -107,13 +111,16 @@ func (state *UsersState) productButtons(products []*ProdTree) [][]tgbotapi.Inlin
 			rows = append(rows, []tgbotapi.InlineKeyboardButton{button})
 			rows = append(rows, []tgbotapi.InlineKeyboardButton{subButton, countButton, addButton})
 		}
+		if back := state.State.Prev; back != nil && back.Product.Name != "root" {
+			rows = append(rows, []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("go back", "change\n"+back.GetHash())})
+		}
 	}
 	return rows
 }
 
 func (state *UsersState) lowButtons() []tgbotapi.InlineKeyboardButton {
-	menu := tgbotapi.NewInlineKeyboardButtonData("🏠", "menu\n")
-	location := tgbotapi.NewInlineKeyboardButtonData("🗺", "reset\n")
+	menu := tgbotapi.NewInlineKeyboardButtonData("📖", "catalog\n")
+	location := tgbotapi.NewInlineKeyboardButtonData("🏠", "home\n")
 	basket := tgbotapi.NewInlineKeyboardButtonData("🧺 "+strconv.FormatFloat(state.Baskets[state.Current].Sum, 'f', 2, 64), "basket\n")
 	return []tgbotapi.InlineKeyboardButton{menu, location, basket}
 }

@@ -2,6 +2,7 @@ package ppdrop
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -28,14 +29,21 @@ func (b *Bot) handleCallback(update tgbotapi.Update) {
 	if data[0] == "basket" {
 		b.Updates <- &BasketReq{ChatID: ChatID}
 	}
+	if data[0] == "home" {
+		b.Updates <- &HomeReq{ChatID: ChatID}
+	}
 	if data[0] == "newbasket" {
 		b.Updates <- &NewBasket{ChatID: ChatID}
 	}
-	if data[0] == "menu" {
-		b.Updates <- &MenuReq{ChatID: ChatID}
+	if data[0] == "catalog" {
+		b.Updates <- &CatalogReq{ChatID: ChatID}
 	}
 	if data[0] == "reset" {
 		b.Updates <- &Reset{ChatID: ChatID}
+	}
+	if data[0] == "location" {
+		loc, _ := strconv.ParseUint(data[1], 10, 64)
+		b.Updates <- &NewLocation{Location: loc, ChatID: ChatID}
 	}
 	_, err := b.api.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, ""))
 	if err != nil {
