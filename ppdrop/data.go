@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+var Locations = make(map[uint64]*Location)
+
 func (s *Server) LoadData() {
 	path := "./data/"
 
@@ -14,13 +16,17 @@ func (s *Server) LoadData() {
 	if err != nil {
 		panic(err)
 	}
+
+	s.Tree.Next["basket"] = &ProdTree{Product: Product{Name: "basket"}, Prev: s.Tree}
+	s.Tree.Next["home"] = &ProdTree{Product: Product{Name: "home"}, Prev: s.Tree}
+
 	for i, dir := range files {
 		if dir.IsDir() {
 			s.AddLocationsFromFile(path+dir.Name()+"/Locations.csv", uint64(i+1))
 			s.Tree.AddProductFromFile(path+dir.Name()+"/Products.csv", uint64(i+1))
 		}
 	}
-	for id, loc := range s.Locaitons {
+	for id, loc := range Locations {
 		fmt.Println(id, " ", loc.Adress, " ", loc.Lat, " ", loc.Lng)
 	}
 }
@@ -46,7 +52,7 @@ func (s *Server) AddLocation(line *string, netid uint64) {
 		fmt.Println("location from file err:", err)
 	}
 	location := Location{ID: id, Lat: lat, Lng: long, Name: parts[1], Adress: parts[2]}
-	s.Locaitons[location.ID] = &location
+	Locations[location.ID] = &location
 }
 
 func (tree *ProdTree) AddProductFromFile(path string, netid uint64) *ProdTree {

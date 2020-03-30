@@ -14,6 +14,6 @@ func main() {
 	bot := ppdrop.NewBot(key, "creds/bot.json")
 	admin := ppdrop.NewBot(key, "creds/admin.bot.json")
 	go bot.Listen()
-	go admin.Listen()
+	//go admin.Listen()
 	ppdrop.StartServer(bot, admin)
 }

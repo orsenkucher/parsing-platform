@@ -2,21 +2,14 @@ package ppdrop
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-func (b *Bot) NewLocation(chatid int64, loc string) {
-	locid, err := strconv.ParseUint(loc, 10, 64)
-	if err == nil {
-		nl := &NewLocation{Location: locid, ChatID: chatid}
-		b.Updates <- nl
-	} else {
-		nl := &NewLocation{Location: 0, ChatID: chatid}
-		b.Updates <- nl
-	}
+func (b *Bot) HandleMessage(chatid int64, text string) {
+	fmt.Print("CheckUser")
+	b.Updates <- &CheckUser{ChatID: chatid}
 }
 
 func (b *Bot) handleCallback(update tgbotapi.Update) {
@@ -34,6 +27,9 @@ func (b *Bot) handleCallback(update tgbotapi.Update) {
 	}
 	if data[0] == "basket" {
 		b.Updates <- &BasketReq{ChatID: ChatID}
+	}
+	if data[0] == "newbasket" {
+		b.Updates <- &NewBasket{ChatID: ChatID}
 	}
 	if data[0] == "menu" {
 		b.Updates <- &MenuReq{ChatID: ChatID}

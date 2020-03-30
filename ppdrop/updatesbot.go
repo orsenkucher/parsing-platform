@@ -1,6 +1,9 @@
 package ppdrop
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+)
 
 type Update interface {
 	Update(s *Server)
@@ -12,18 +15,19 @@ type NewLocation struct {
 }
 
 func (u *NewLocation) Update(s *Server) {
-	locname := strconv.FormatUint(u.Location, 10)
-	if _, ok := s.Tree.Next[locname]; ok {
-		_, ok := s.UsersStates[u.ChatID]
+	locstr := strconv.FormatUint(u.Location, 10)
+	if _, ok := s.Tree.Next[locstr]; ok {
+		state, ok := s.UsersStates[u.ChatID]
 		if !ok {
-			s.UsersStates[u.ChatID] = &UsersState{Location: s.Locaitons[u.Location].Name, State: s.Tree.Next[locname], Purchases: []*Purchase{}, Sum: 0, ChatID: u.ChatID}
-		} else {
-			s.UsersStates[u.ChatID].Location = locname
-			s.UsersStates[u.ChatID].State = s.Tree.Next[locname]
+			state = &UsersState{Current: u.Location, State: s.Tree.Next[locstr], Baskets: make(map[uint64]*Basket), ChatID: u.ChatID}
+			s.UsersStates[u.ChatID] = state
 		}
-		s.ReloadMsg(u.ChatID)
-	} else {
-		s.ReloadMsg(u.ChatID)
+		_, ok = state.Baskets[u.Location]
+		if !ok {
+			state.Baskets[u.Location] = &Basket{Location: u.Location, Purchases: []*Purchase{}}
+		}
+		state.State = s.Tree.Next[locstr]
+		s.Bot.UpdateMsg(state.GenerateMsg())
 	}
 	//s.Bot.SendMessage(u.ChatID, u.Location+"\n"+s.Queries[u.ChatID].ToString())
 }
@@ -34,9 +38,9 @@ type ChangeState struct {
 }
 
 func (u *ChangeState) Update(s *Server) {
-	query := s.GetQuery(u.ChatID)
-	query.State = s.Tree.GetNode(u.Path)
-	s.ReloadMsg(u.ChatID)
+	state := s.GetQuery(u.ChatID)
+	state.State = s.Tree.GetNode(u.Path)
+	s.Bot.UpdateMsg(state.GenerateMsg())
 }
 
 type Add struct {
@@ -45,20 +49,21 @@ type Add struct {
 }
 
 func (u *Add) Update(s *Server) {
-	query := s.GetQuery(u.ChatID)
+	state := s.GetQuery(u.ChatID)
+	basket := state.Baskets[state.Current]
 	product := s.Tree.GetNode(u.Path)
 
-	for _, purch := range query.Purchases {
+	for _, purch := range basket.Purchases {
 		if product == purch.Product {
 			purch.Count++
-			query.Sum += product.Product.Price
-			s.ReloadMsg(u.ChatID)
+			basket.Sum += product.Product.Price
+			s.Bot.UpdateMsg(state.GenerateMsg())
 			return
 		}
 	}
-	query.Purchases = append(query.Purchases, &Purchase{Product: product, Count: 1})
-	query.Sum += product.Product.Price
-	s.ReloadMsg(u.ChatID)
+	basket.Purchases = append(basket.Purchases, &Purchase{Product: product, Count: 1})
+	basket.Sum += product.Product.Price
+	s.Bot.UpdateMsg(state.GenerateMsg())
 }
 
 type Sub struct {
@@ -67,15 +72,16 @@ type Sub struct {
 }
 
 func (u *Sub) Update(s *Server) {
-	query := s.GetQuery(u.ChatID)
+	state := s.GetQuery(u.ChatID)
+	basket := state.Baskets[state.Current]
 	product := s.Tree.GetNode(u.Path)
 
-	for _, purch := range query.Purchases {
+	for _, purch := range basket.Purchases {
 		if product == purch.Product {
 			if purch.Count > 0 {
 				purch.Count--
-				query.Sum -= product.Product.Price
-				s.ReloadMsg(u.ChatID)
+				basket.Sum -= product.Product.Price
+				s.Bot.UpdateMsg(state.GenerateMsg())
 			}
 			return
 		}
@@ -87,9 +93,9 @@ type BasketReq struct {
 }
 
 func (u *BasketReq) Update(s *Server) {
-	query := s.GetQuery(u.ChatID)
-	query.State = nil
-	s.ReloadMsg(u.ChatID)
+	state := s.GetQuery(u.ChatID)
+	state.State = s.Tree.Next["basket"]
+	s.Bot.UpdateMsg(state.GenerateMsg())
 }
 
 type MenuReq struct {
@@ -97,9 +103,9 @@ type MenuReq struct {
 }
 
 func (u *MenuReq) Update(s *Server) {
-	query := s.GetQuery(u.ChatID)
-	query.State = s.Tree.Next[query.Location]
-	s.ReloadMsg(u.ChatID)
+	state := s.GetQuery(u.ChatID)
+	state.State = s.Tree.Next[strconv.FormatUint(state.Baskets[state.Current].Location, 10)]
+	s.Bot.UpdateMsg(state.GenerateMsg())
 }
 
 type Reset struct {
@@ -108,14 +114,37 @@ type Reset struct {
 
 func (u *Reset) Update(s *Server) {
 	delete(s.UsersStates, u.ChatID)
-	s.ReloadMsg(u.ChatID)
+	//s.Bot.UpdateMsg(state.GenerateMsg())
+}
+
+type CheckUser struct {
+	ChatID int64
+}
+
+func (u *CheckUser) Update(s *Server) {
+	if state, ok := s.UsersStates[u.ChatID]; !ok {
+		fmt.Print(state)
+		state = &UsersState{State: s.Tree.Next["home"], Baskets: make(map[uint64]*Basket), ChatID: u.ChatID}
+		s.UsersStates[u.ChatID] = state
+		s.Bot.UpdateMsg(state.GenerateMsg())
+	}
+}
+
+type NewBasket struct {
+	ChatID int64
+}
+
+func (u *NewBasket) Update(s *Server) {
+	state := s.UsersStates[u.ChatID]
+	state.State = s.Tree
+	s.Bot.UpdateMsg(state.GenerateMsg())
 }
 
 func (s *Server) GetQuery(ChatID int64) *UsersState {
-	query, ok := s.UsersStates[ChatID]
+	state, ok := s.UsersStates[ChatID]
 	if !ok {
-		query = &UsersState{Location: "", State: s.Tree, Purchases: []*Purchase{}, Sum: 0, ChatID: ChatID}
-		s.UsersStates[ChatID] = query
+		state = &UsersState{State: s.Tree, Baskets: make(map[uint64]*Basket), ChatID: ChatID}
+		s.UsersStates[ChatID] = state
 	}
-	return query
+	return state
 }

@@ -38,7 +38,7 @@ func (s *Server) GetLocation(w http.ResponseWriter, r *http.Request) {
 func (s *Server) GiveLocations(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Give locations")
 	locs := []*Location{}
-	for _, loc := range s.Locaitons {
+	for _, loc := range Locations {
 		locs = append(locs, loc)
 	}
 	data, err := json.Marshal(locs)

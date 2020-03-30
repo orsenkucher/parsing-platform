@@ -67,12 +67,12 @@ func (b *Bot) Listen() {
 
 		if update.Message != nil {
 			if update.Message.Text != "" {
+				b.HandleMessage(update.Message.Chat.ID, update.Message.Text)
 				delcfg := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
 				if _, err := b.api.DeleteMessage(delcfg); err != nil {
 					log.Println(err)
 				}
 			}
-			b.NewLocation(update.Message.Chat.ID, update.Message.Text)
 
 			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 			continue
