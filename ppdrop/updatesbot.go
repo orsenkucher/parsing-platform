@@ -25,8 +25,8 @@ func (u *NewLocation) Update(s *Server) {
 		_, ok = state.Baskets[u.Location]
 		if !ok {
 			state.Baskets[u.Location] = &Basket{Location: u.Location, Purchases: []*Purchase{}}
-			state.Current = u.Location
 		}
+		state.Current = u.Location
 		state.State = s.Tree.Next[locstr]
 		s.Bot.UpdateMsg(state.GenerateMsg())
 	}

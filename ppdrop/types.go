@@ -32,7 +32,7 @@ type Basket struct {
 }
 
 func (state *UsersState) ToString() string {
-	fmt.Println()
+	fmt.Println(len(state.Baskets), " ", state.Current)
 	basket := state.Baskets[state.Current]
 	str := ""
 	for _, p := range basket.Purchases {

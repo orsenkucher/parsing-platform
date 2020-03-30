@@ -19,7 +19,9 @@ func (state *UsersState) GenerateMsg() tgbotapi.MessageConfig {
 	fmt.Println("State: ", state.State.Product.Name)
 	var tgmsg tgbotapi.MessageConfig
 	if state.State.Product.Name == "basket" {
-
+		tgmsg = tgbotapi.NewMessage(state.ChatID, state.BasketMsg())
+		btms := state.BasketBtm()
+		tgmsg.ReplyMarkup = &btms
 	} else if state.State.Product.Name == "home" {
 		tgmsg = tgbotapi.NewMessage(state.ChatID, state.HomeMsg())
 		btms := state.HomeBtm()
@@ -70,6 +72,21 @@ func (state *UsersState) BasketMsg() string {
 	return state.ToString()
 }
 
+func (state *UsersState) BasketBtm() tgbotapi.InlineKeyboardMarkup {
+	var rows [][]tgbotapi.InlineKeyboardButton
+	basket := state.Baskets[state.Current]
+
+	products := make([]*ProdTree, 0, len(basket.Purchases))
+	for _, purch := range basket.Purchases {
+		products = append(products, purch.Product)
+	}
+
+	rows = state.productButtons(products)
+	rows = append(rows, state.lowButtons())
+
+	return tgbotapi.NewInlineKeyboardMarkup(rows...)
+}
+
 func (state *UsersState) TreeBtm() tgbotapi.InlineKeyboardMarkup {
 	var rows [][]tgbotapi.InlineKeyboardButton
 
@@ -111,9 +128,9 @@ func (state *UsersState) productButtons(products []*ProdTree) [][]tgbotapi.Inlin
 			rows = append(rows, []tgbotapi.InlineKeyboardButton{button})
 			rows = append(rows, []tgbotapi.InlineKeyboardButton{subButton, countButton, addButton})
 		}
-		if back := state.State.Prev; back != nil && back.Product.Name != "root" {
-			rows = append(rows, []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("go back", "change\n"+back.GetHash())})
-		}
+	}
+	if back := state.State.Prev; back != nil && back.Product.Name != "root" {
+		rows = append(rows, []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("go back", "change\n"+back.GetHash())})
 	}
 	return rows
 }
