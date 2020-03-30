@@ -1,6 +1,10 @@
 package admin
 
-import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+import (
+	"fmt"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+)
 
 type StateFn func(tgbotapi.Update) StateFn
 
@@ -24,15 +28,24 @@ func (s *State) Bind(upds tgbotapi.UpdatesChannel, sender Sender) {
 }
 
 func (s *State) start(upd tgbotapi.Update) StateFn {
-	s.sender.WriteMessages(tgbotapi.NewMessage(chatID(upd), "Send location"))
-	return s.location
+	msg := tgbotapi.NewMessage(chatID(upd), "Жду твой номер, бро🤫")
+	// btn := tgbotapi.NewKeyboardButtonLocation("Send to bot")
+	btn := tgbotapi.NewKeyboardButtonContact("Отправить номер")
+	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(btn))
+	s.sender.WriteMessages(msg)
+	return s.phone
 }
 
-func (s *State) location(upd tgbotapi.Update) StateFn {
+func (s *State) phone(upd tgbotapi.Update) StateFn {
 	// msg := tgbotapi.NewMessage(chatID(upd), "Great")
 	// edt := tgbotapi.NewEditMessageText()
 	// s.sender.EditMessages()
-	s.sender.WriteMessages(tgbotapi.NewMessage(chatID(upd), "Great"))
+	cont := upd.Message.Contact
+	fmt.Println(cont)
+	msg := tgbotapi.NewMessage(chatID(upd), "Отлично")
+	btn := tgbotapi.NewRemoveKeyboard(false)
+	msg.ReplyMarkup = btn
+	s.sender.WriteMessages(msg, tgbotapi.NewMessage(chatID(upd), fmt.Sprint(cont)))
 	return s.start
 }
 

@@ -16,6 +16,7 @@ type Editor interface {
 	EditMessages(...tgbotapi.EditMessageTextConfig)
 }
 
+// ChatManager
 type Sender interface {
 	Writer
 	Editor
