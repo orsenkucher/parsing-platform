@@ -25,6 +25,7 @@ func (u *NewLocation) Update(s *Server) {
 		_, ok = state.Baskets[u.Location]
 		if !ok {
 			state.Baskets[u.Location] = &Basket{Location: u.Location, Purchases: []*Purchase{}}
+			state.Current = u.Location
 		}
 		state.State = s.Tree.Next[locstr]
 		s.Bot.UpdateMsg(state.GenerateMsg())
@@ -38,7 +39,7 @@ type ChangeState struct {
 }
 
 func (u *ChangeState) Update(s *Server) {
-	state := s.GetQuery(u.ChatID)
+	state := s.GetState(u.ChatID)
 	state.State = s.Tree.GetNode(u.Path)
 	s.Bot.UpdateMsg(state.GenerateMsg())
 }
@@ -49,7 +50,7 @@ type Add struct {
 }
 
 func (u *Add) Update(s *Server) {
-	state := s.GetQuery(u.ChatID)
+	state := s.GetState(u.ChatID)
 	basket := state.Baskets[state.Current]
 	product := s.Tree.GetNode(u.Path)
 
@@ -72,7 +73,7 @@ type Sub struct {
 }
 
 func (u *Sub) Update(s *Server) {
-	state := s.GetQuery(u.ChatID)
+	state := s.GetState(u.ChatID)
 	basket := state.Baskets[state.Current]
 	product := s.Tree.GetNode(u.Path)
 
@@ -93,18 +94,29 @@ type BasketReq struct {
 }
 
 func (u *BasketReq) Update(s *Server) {
-	state := s.GetQuery(u.ChatID)
+	state := s.GetState(u.ChatID)
 	state.State = s.Tree.Next["basket"]
 	s.Bot.UpdateMsg(state.GenerateMsg())
 }
 
-type MenuReq struct {
+type CatalogReq struct {
 	ChatID int64
 }
 
-func (u *MenuReq) Update(s *Server) {
-	state := s.GetQuery(u.ChatID)
+func (u *CatalogReq) Update(s *Server) {
+	state := s.GetState(u.ChatID)
 	state.State = s.Tree.Next[strconv.FormatUint(state.Baskets[state.Current].Location, 10)]
+	s.Bot.UpdateMsg(state.GenerateMsg())
+}
+
+type HomeReq struct {
+	ChatID int64
+}
+
+func (u *HomeReq) Update(s *Server) {
+	state := s.GetState(u.ChatID)
+	state.State = s.Tree.Next["home"]
+	state.Current = 0
 	s.Bot.UpdateMsg(state.GenerateMsg())
 }
 
@@ -140,7 +152,7 @@ func (u *NewBasket) Update(s *Server) {
 	s.Bot.UpdateMsg(state.GenerateMsg())
 }
 
-func (s *Server) GetQuery(ChatID int64) *UsersState {
+func (s *Server) GetState(ChatID int64) *UsersState {
 	state, ok := s.UsersStates[ChatID]
 	if !ok {
 		state = &UsersState{State: s.Tree, Baskets: make(map[uint64]*Basket), ChatID: ChatID}

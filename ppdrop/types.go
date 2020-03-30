@@ -31,9 +31,9 @@ type Basket struct {
 	Sum       float64
 }
 
-func (s *UsersState) ToString() string {
+func (state *UsersState) ToString() string {
 	fmt.Println()
-	basket := s.Baskets[s.Current]
+	basket := state.Baskets[state.Current]
 	str := ""
 	for _, p := range basket.Purchases {
 		if p.Count > 0 {
