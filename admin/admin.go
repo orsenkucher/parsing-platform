@@ -9,29 +9,91 @@ import (
 	"github.com/orsenkucher/nothing/encio"
 )
 
-// type Binder interface {
-// 	Bind(tgbotapi.UpdatesChannel)
-// }
+type Binder interface {
+	Bind(tgbotapi.UpdatesChannel)
+}
+
+func NewBot(cfg encio.Config, binder Binder) *Bot {
+	bot := &Bot{
+		cfg:            cfg,
+		usersMsg:       make(map[int64]int),
+		messagesMaster: make(chan deferredMessage, 1000),
+		messagesBackup: make(chan deferredMessage, 1000),
+	}
+	bot.init()
+	go bot.processMessages()
+	go bot.listen(binder)
+	return bot
+}
+
+func (b *Bot) init() {
+	var err error
+	b.api, err = tgbotapi.NewBotAPI(b.cfg["token"].(string))
+	if err != nil {
+		log.Fatalln(err)
+	}
+	if flag, ok := b.cfg["debug"]; ok {
+		b.api.Debug = flag.(bool)
+	}
+	log.Printf("Authorized on account %s\n", b.api.Self.UserName)
+	_, err = b.api.RemoveWebhook()
+	if err != nil {
+		log.Println("Cant remove webhook")
+	}
+}
+
+func (b *Bot) listen(binder Binder) {
+	ucfg := tgbotapi.NewUpdate(0)
+	ucfg.Timeout = 60
+	updates, err := b.api.GetUpdatesChan(ucfg)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	pipe := make(chan tgbotapi.Update)
+	binder.Bind(pipe)
+	for update := range updates {
+		if update.Message != nil {
+			if update.Message.Text != "" {
+				delcfg := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
+				if _, err := b.api.DeleteMessage(delcfg); err != nil {
+					log.Println(err)
+				}
+			}
+			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+		}
+		pipe <- update
+	}
+}
 
 type Bot struct {
-	api              *tgbotapi.BotAPI
-	cfg              encio.Config
+	api *tgbotapi.BotAPI
+	cfg encio.Config
+
 	messagesMaster   chan deferredMessage
 	messagesBackup   chan deferredMessage
 	lastMessageTimes map[int64]int64
+
+	usersMsg map[int64]int
 }
 
 type deferredMessage struct {
 	chatID int64
-	text   string
+	text   string // Chattable
 }
 
 // Такс, сначала пишем просто. Потом выносим композицию
-func AdminBot(key encio.EncIO) *Bot {
+func AdminBot(key encio.EncIO, binder Binder) *Bot {
 	fmt.Println("============AdminBot============")
 	cfg := cfg(key, "creds/admin.bot.json")
-	bot := &Bot{cfg: cfg}
-	go bot.processMessages()
+	bot := NewBot(cfg, binder)
+	return bot
+}
+
+func ClientBot(key encio.EncIO, binder Binder) *Bot {
+	fmt.Println("============ClientBot============")
+	cfg := cfg(key, "creds/client.bot.json")
+	bot := NewBot(cfg, binder)
 	return bot
 }
 
