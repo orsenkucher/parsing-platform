@@ -1,7 +1,6 @@
 package admin
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -96,62 +95,6 @@ type defferedShipment struct {
 	cargo  tgbotapi.Chattable
 }
 
-type StateFn func(tgbotapi.Update) StateFn
-
-type State struct {
-	sender Sender
-	users  map[int64]int
-}
-
-func NewState() *State {
-	return &State{users: make(map[int64]int)}
-}
-
-func (s *State) Start(upd tgbotapi.Update) StateFn {
-	s.sender.WriteMessages(tgbotapi.NewMessage(chatID(upd), "Hello"))
-	return s.Start
-}
-
-func chatID(u tgbotapi.Update) int64 {
-	if u.Message != nil {
-		return u.Message.Chat.ID
-	} else {
-		return u.CallbackQuery.Message.Chat.ID
-	}
-}
-
-func (s *State) Bind(upds tgbotapi.UpdatesChannel, sender Sender) {
-	s.sender = sender
-	state := s.Start
-	for upd := range upds {
-		state = state(upd)
-	}
-}
-
-// Такс, сначала пишем просто. Потом выносим композицию
-func AdminBot(key encio.EncIO) *Bot {
-	fmt.Println("============AdminBot============")
-	cfg := cfg(key, "creds/admin.bot.json")
-	binder := NewState()
-	bot := NewBot(cfg, binder)
-	return bot
-}
-
-func ClientBot(key encio.EncIO, binder Binder) *Bot {
-	fmt.Println("============ClientBot============")
-	cfg := cfg(key, "creds/client.bot.json")
-	bot := NewBot(cfg, binder)
-	return bot
-}
-
-func cfg(key encio.EncIO, path string) encio.Config {
-	cfg, err := key.GetConfig(path)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	return cfg
-}
-
 var _ Sender = (*Bot)(nil)
 
 func (b *Bot) WriteMessages(mm ...tgbotapi.MessageConfig) {
@@ -167,12 +110,8 @@ func (b *Bot) EditMessages(mm ...tgbotapi.EditMessageTextConfig) {
 	panic("TODO")
 }
 
-func (b *Bot) sendMessage(msg defferedShipment) (tgbotapi.Message, error) {
-	b.shipTime[msg.chatID] = time.Now().UnixNano()
-	return b.api.Send(msg.cargo)
-}
-
 // TODO handle errors
+// This wont work
 func (b *Bot) processMessages() {
 	timer := time.NewTicker(time.Second / 30)
 	for range timer.C {
@@ -190,6 +129,11 @@ func (b *Bot) processMessages() {
 			b.sendMessage(defferedCargo)
 		}
 	}
+}
+
+func (b *Bot) sendMessage(msg defferedShipment) (tgbotapi.Message, error) {
+	b.shipTime[msg.chatID] = time.Now().UnixNano()
+	return b.api.Send(msg.cargo)
 }
 
 // TODO do this better
