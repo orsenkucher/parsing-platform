@@ -43,6 +43,7 @@ func (b *Bot) handleCallback(update tgbotapi.Update) {
 	}
 	if data[0] == "location" {
 		loc, _ := strconv.ParseUint(data[1], 10, 64)
+		fmt.Println("change location to ", loc)
 		b.Updates <- &NewLocation{Location: loc, ChatID: ChatID}
 	}
 	_, err := b.api.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, ""))
