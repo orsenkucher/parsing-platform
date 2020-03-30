@@ -105,6 +105,7 @@ type MenuReq struct {
 
 func (u *MenuReq) Update(s *Server) {
 	state := s.GetQuery(u.ChatID)
+	fmt.Println(state.Baskets)
 	state.State = s.Tree.Next[strconv.FormatUint(state.Baskets[state.Current].Location, 10)]
 	s.Bot.UpdateMsg(state.GenerateMsg())
 }
