@@ -14,6 +14,9 @@ func (b *Bot) HandleMessage(chatid int64, text string) {
 }
 
 func (b *Bot) handleCallback(update tgbotapi.Update) {
+	if _, ok := b.UsersMsg[update.Message.Chat.ID]; !ok {
+		return
+	}
 	data := strings.Split(update.CallbackQuery.Data, "\n")
 	ChatID := update.CallbackQuery.Message.Chat.ID
 	fmt.Println(data, ChatID)
