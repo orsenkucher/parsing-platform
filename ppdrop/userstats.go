@@ -59,7 +59,7 @@ func (state *UsersState) LocationMsg() string {
 }
 
 func (state *UsersState) LocationBtm() tgbotapi.InlineKeyboardMarkup {
-	urlbutton := tgbotapi.NewInlineKeyboardButtonURL("🗺 OpenMap", fmt.Sprintf("https://map-bot.abmcloud.com?chatid=%v", state.ChatID))
+	urlbutton := tgbotapi.NewInlineKeyboardButtonURL("🗺 OpenMap", fmt.Sprintf("https://map-bot.abmcloud.com/#/?chatid=%v", state.ChatID))
 
 	rows := [][]tgbotapi.InlineKeyboardButton{[]tgbotapi.InlineKeyboardButton{urlbutton}}
 	return tgbotapi.NewInlineKeyboardMarkup(rows...)
