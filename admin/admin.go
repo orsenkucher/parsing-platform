@@ -9,16 +9,31 @@ import (
 	"github.com/orsenkucher/nothing/encio"
 )
 
+type Writer interface {
+	WriteMessages(...tgbotapi.MessageConfig)
+}
+
+type Editor interface {
+	EditMessages(...tgbotapi.EditMessageTextConfig)
+}
+
+type Sender interface {
+	Writer
+	Editor
+}
+
 type Binder interface {
-	Bind(tgbotapi.UpdatesChannel)
+	Bind(tgbotapi.UpdatesChannel, Sender)
+	// Bind2(func (tgbotapi.Update))
 }
 
 func NewBot(cfg encio.Config, binder Binder) *Bot {
 	bot := &Bot{
-		cfg:            cfg,
-		usersMsg:       make(map[int64]int),
-		messagesMaster: make(chan deferredMessage, 1000),
-		messagesBackup: make(chan deferredMessage, 1000),
+		cfg:        cfg,
+		shipLog:    make(map[int64][]int),
+		shipTime:   make(map[int64]int64),
+		shipMaster: make(chan defferedShipment, 1000),
+		shipBackup: make(chan defferedShipment, 1000),
 	}
 	bot.init()
 	go bot.processMessages()
@@ -51,7 +66,7 @@ func (b *Bot) listen(binder Binder) {
 	}
 
 	pipe := make(chan tgbotapi.Update)
-	binder.Bind(pipe)
+	go binder.Bind(pipe, b)
 	for update := range updates {
 		if update.Message != nil {
 			if update.Message.Text != "" {
@@ -70,22 +85,54 @@ type Bot struct {
 	api *tgbotapi.BotAPI
 	cfg encio.Config
 
-	messagesMaster   chan deferredMessage
-	messagesBackup   chan deferredMessage
-	lastMessageTimes map[int64]int64
-
-	usersMsg map[int64]int
+	shipMaster chan defferedShipment // main message channel
+	shipBackup chan defferedShipment // reserve channel
+	shipTime   map[int64]int64       // last sent time
+	shipLog    map[int64][]int       // sent history
 }
 
-type deferredMessage struct {
+type defferedShipment struct {
 	chatID int64
-	text   string // Chattable
+	cargo  tgbotapi.Chattable
+}
+
+type StateFn func(tgbotapi.Update) StateFn
+
+type State struct {
+	sender Sender
+	users  map[int64]int
+}
+
+func NewState() *State {
+	return &State{users: make(map[int64]int)}
+}
+
+func (s *State) Start(upd tgbotapi.Update) StateFn {
+	s.sender.WriteMessages(tgbotapi.NewMessage(chatID(upd), "Hello"))
+	return s.Start
+}
+
+func chatID(u tgbotapi.Update) int64 {
+	if u.Message != nil {
+		return u.Message.Chat.ID
+	} else {
+		return u.CallbackQuery.Message.Chat.ID
+	}
+}
+
+func (s *State) Bind(upds tgbotapi.UpdatesChannel, sender Sender) {
+	s.sender = sender
+	state := s.Start
+	for upd := range upds {
+		state = state(upd)
+	}
 }
 
 // Такс, сначала пишем просто. Потом выносим композицию
-func AdminBot(key encio.EncIO, binder Binder) *Bot {
+func AdminBot(key encio.EncIO) *Bot {
 	fmt.Println("============AdminBot============")
 	cfg := cfg(key, "creds/admin.bot.json")
+	binder := NewState()
 	bot := NewBot(cfg, binder)
 	return bot
 }
@@ -105,13 +152,24 @@ func cfg(key encio.EncIO, path string) encio.Config {
 	return cfg
 }
 
-func (b *Bot) SendMessage(chatID int64, text string) {
-	b.messagesMaster <- deferredMessage{chatID, text}
+var _ Sender = (*Bot)(nil)
+
+func (b *Bot) WriteMessages(mm ...tgbotapi.MessageConfig) {
+	for _, m := range mm {
+		b.shipMaster <- defferedShipment{chatID: m.ChatID, cargo: m}
+	}
 }
 
-func (b *Bot) sendMessage(msg deferredMessage) (tgbotapi.Message, error) {
-	b.lastMessageTimes[msg.chatID] = time.Now().UnixNano()
-	return b.api.Send(tgbotapi.NewMessage(msg.chatID, msg.text))
+func (b *Bot) EditMessages(mm ...tgbotapi.EditMessageTextConfig) {
+	// for m := range mm {
+	// 	b.messagesMaster <- defferedShipment{chatID: m.ChatID, cargo: m}
+	// }
+	panic("TODO")
+}
+
+func (b *Bot) sendMessage(msg defferedShipment) (tgbotapi.Message, error) {
+	b.shipTime[msg.chatID] = time.Now().UnixNano()
+	return b.api.Send(msg.cargo)
 }
 
 // TODO handle errors
@@ -119,24 +177,24 @@ func (b *Bot) processMessages() {
 	timer := time.NewTicker(time.Second / 30)
 	for range timer.C {
 		select {
-		case msgMaster := <-b.messagesMaster:
-			if ok, delta := b.userCanReceiveMessage(msgMaster.chatID); !ok {
+		case cargo := <-b.shipMaster:
+			if ok, delta := b.userCanReceiveMessage(cargo.chatID); !ok {
 				go func() {
 					time.Sleep(time.Duration(delta))
-					b.messagesBackup <- msgMaster
+					b.shipBackup <- cargo
 				}()
 			} else {
-				b.sendMessage(msgMaster)
+				b.sendMessage(cargo)
 			}
-		case msgBackup := <-b.messagesBackup:
-			b.sendMessage(msgBackup)
+		case defferedCargo := <-b.shipBackup:
+			b.sendMessage(defferedCargo)
 		}
 	}
 }
 
 // TODO do this better
 func (b *Bot) userCanReceiveMessage(userId int64) (can bool, delta int64) {
-	if t, ok := b.lastMessageTimes[userId]; ok {
+	if t, ok := b.shipTime[userId]; ok {
 		delta = time.Now().UnixNano() - t
 		can = delta >= int64(time.Second)
 		return
