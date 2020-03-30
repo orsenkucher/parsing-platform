@@ -25,27 +25,24 @@ type Location struct {
 	Adress string  `json:"adress"`
 }
 
-type UsersState struct {
-	State     *ProdTree
-	Location  string
+type Basket struct {
+	Location  uint64
 	Purchases []*Purchase
 	Sum       float64
-	ChatID    int64
 }
 
-func (q *UsersState) ToString() string {
+func (s *UsersState) ToString() string {
 	fmt.Println()
+	basket := s.Baskets[s.Current]
 	str := ""
-	for _, p := range q.Purchases {
+	for _, p := range basket.Purchases {
 		if p.Count > 0 {
 			str += p.ToString()
 		}
 	}
-	str += "sum: " + strconv.FormatFloat(q.Sum, 'f', 2, 64) + "\n"
+	str += "Вартість: " + strconv.FormatFloat(basket.Sum, 'f', 2, 64) + "\n"
 	return str
 }
-
-//func (q *Query)
 
 func (p *Purchase) ToString() string {
 	return p.Product.Product.Name + " " + strconv.Itoa(p.Count) + "\n"
