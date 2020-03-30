@@ -11,7 +11,7 @@ const RESOURCES = {
 "/icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "/icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
 "/index.html": "f4d0dc27bd6da639acc29fb581f61446",
-"/main.dart.js": "b35a8fa957960f73a59fc23e0763dade",
+"/main.dart.js": "b97eb60d121cded0650ec4a4af62cbf1",
 "/manifest.json": "a246126fb0acdfd05ae6fbbf54869136"
 };
 

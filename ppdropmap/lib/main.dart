@@ -17,7 +17,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:google_maps/google_maps.dart' hide Icon;
 import 'package:location/location.dart';
 
-const servurl = 'http://95.217.131.177:9094/';
+// const servurl = 'http://95.217.131.177:9094/';
+const servurl = 'https://core-bot.abmcloud.com';
 
 void main() {
   runApp(MyApp());

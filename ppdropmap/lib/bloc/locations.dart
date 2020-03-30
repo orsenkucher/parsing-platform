@@ -10,7 +10,7 @@ import 'package:bloc/bloc.dart';
 part 'locations.freezed.dart';
 part 'locations.g.dart';
 
-const servurl = 'http://95.217.131.177:9094';
+const servurl = 'https://core-bot.abmcloud.com';
 
 @freezed
 abstract class Location with _$Location {
