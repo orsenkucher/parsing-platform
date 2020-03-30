@@ -38259,7 +38259,7 @@ t=q}while(true)switch(t){case 0:t=u.fZ.c(a)?3:4
 break
 case 3:q=6
 t=9
-return P.e0(G.a5N("http://95.217.131.177:9094/locations"),$async$f8,s)
+return P.e0(G.a5N("https://core-bot.abmcloud.com/locations"),$async$f8,s)
 case 9:n=c
 P.aj(n.b)
 t=n.b===200?10:11
@@ -38592,7 +38592,7 @@ $S:32}
 F.Jy.prototype={
 $0:function(){var t,s,r,q=C.av.el(P.aV(["chatid",$.kk().d,"location",this.b.a],u.N,u.K))
 P.aj("body: "+H.a(q))
-try{G.a6d("http://95.217.131.177:9094/",q).br(new F.Ju(),u.H)}catch(s){t=H.L(s)
+try{G.a6d("https://core-bot.abmcloud.com",q).br(new F.Ju(),u.H)}catch(s){t=H.L(s)
 P.aj("err: "+H.a(t))}r=this.c.q8(u.iK)
 r.rg(null)
 P.TF(P.dD(0,200),new F.Jv(),u.y)
