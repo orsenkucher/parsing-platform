@@ -24,7 +24,7 @@ func (u *NewLocation) Update(s *Server) {
 		}
 		_, ok = state.Baskets[u.Location]
 		if !ok {
-			state.Baskets[u.Location] = &Basket{Location: u.Location, Purchases: []*Purchase{}}
+			state.Baskets[u.Location] = &Basket{Location: u.Location, Purchases: []*Purchase{}, Status: New}
 		}
 		state.Current = u.Location
 		state.State = s.Tree.Next[locstr]
@@ -82,6 +82,15 @@ func (u *Sub) Update(s *Server) {
 			if purch.Count > 0 {
 				purch.Count--
 				basket.Sum -= product.Product.Price
+				if purch.Count == 0 {
+					purchases := make([]*Purchase, 0, len(basket.Purchases)-1)
+					for _, p := range basket.Purchases {
+						if p.Count > 0 {
+							purchases = append(purchases, p)
+						}
+					}
+					basket.Purchases = purchases
+				}
 				s.Bot.UpdateMsg(state.GenerateMsg())
 			}
 			return
@@ -116,6 +125,9 @@ type HomeReq struct {
 func (u *HomeReq) Update(s *Server) {
 	state := s.GetState(u.ChatID)
 	state.State = s.Tree.Next["home"]
+	if state.Current != 0 && state.Baskets[state.Current].Status == New {
+		delete(state.Baskets, state.Current)
+	}
 	state.Current = 0
 	s.Bot.UpdateMsg(state.GenerateMsg())
 }
@@ -134,12 +146,23 @@ type CheckUser struct {
 }
 
 func (u *CheckUser) Update(s *Server) {
-	if state, ok := s.UsersStates[u.ChatID]; !ok {
+	state, ok := s.UsersStates[u.ChatID]
+	if !ok {
 		fmt.Print(state)
 		state = &UsersState{State: s.Tree.Next["home"], Baskets: make(map[uint64]*Basket), ChatID: u.ChatID}
 		s.UsersStates[u.ChatID] = state
-		s.Bot.UpdateMsg(state.GenerateMsg())
 	}
+	s.Bot.ResendMsg(state.GenerateMsg())
+}
+
+type AgreeHome struct {
+	ChatID int64
+}
+
+func (u *AgreeHome) Update(s *Server) {
+	state := s.GetState(u.ChatID)
+	state.State = s.Tree.Next["agree"]
+	s.Bot.UpdateMsg(state.GenerateMsg())
 }
 
 type NewBasket struct {

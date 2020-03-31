@@ -19,6 +19,7 @@ func (s *Server) LoadData() {
 
 	s.Tree.Next["basket"] = &ProdTree{Product: Product{Name: "basket"}, Prev: s.Tree}
 	s.Tree.Next["home"] = &ProdTree{Product: Product{Name: "home"}, Prev: s.Tree}
+	s.Tree.Next["agree"] = &ProdTree{Product: Product{Name: "agree"}, Prev: s.Tree}
 
 	for i, dir := range files {
 		if dir.IsDir() {

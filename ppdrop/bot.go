@@ -97,3 +97,19 @@ func (b *Bot) UpdateMsg(msg tgbotapi.MessageConfig) {
 		}
 	}
 }
+
+func (b *Bot) ResendMsg(msg tgbotapi.MessageConfig) {
+	prevID, ok := b.UsersMsg[msg.ChatID]
+	if ok {
+		delcfg := tgbotapi.NewDeleteMessage(msg.ChatID, prevID)
+		_, err := b.api.DeleteMessage(delcfg)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+	msgtg, err := b.api.Send(msg)
+	b.UsersMsg[msg.ChatID] = msgtg.MessageID
+	if err != nil {
+		fmt.Println(err)
+	}
+}

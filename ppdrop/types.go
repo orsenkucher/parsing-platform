@@ -25,7 +25,18 @@ type Location struct {
 	Adress string  `json:"adress"`
 }
 
+type Status int
+
+const (
+	New Status = iota
+	Sent
+	Received
+	Processing
+	Ready
+)
+
 type Basket struct {
+	Status    Status
 	Location  uint64
 	Purchases []*Purchase
 	Sum       float64
