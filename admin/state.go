@@ -96,12 +96,13 @@ func (s *State) showBasketToUser(chatID int64) StateFn {
 		return s.showBasket
 	}
 	msg := tgbotapi.NewMessage(chatID, fmt.Sprintf("Текущие заказы\n%s", s.bask.content))
-	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
+	btn := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Выполнить", "confirm"),
 			// tgbotapi.NewInlineKeyboardButtonData("Отменить","reject"),
 		),
 	)
+	msg.ReplyMarkup = &btn
 	s.sender.EditMessages(msg)
 	return s.confirm
 }
