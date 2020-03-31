@@ -35,6 +35,19 @@ const (
 	Ready
 )
 
+func (s *Status) ToString() string {
+	if *s == New {
+		return "Новый"
+	} else if *s == Sent {
+		return "Отправлен"
+	} else if *s == Received {
+		return "В очереди"
+	} else if *s == Processing {
+		return "Собирается"
+	}
+	return "Готово!"
+}
+
 type Basket struct {
 	Status    Status
 	Location  uint64
@@ -42,19 +55,26 @@ type Basket struct {
 	Sum       float64
 }
 
-func (state *UsersState) ToString() string {
-	fmt.Println(len(state.Baskets), " ", state.Current)
-	basket := state.Baskets[state.Current]
-	str := ""
+func (basket *Basket) ToString() string {
+	str := Locations[basket.Location].Name + "\n\n"
 	for _, p := range basket.Purchases {
 		if p.Count > 0 {
 			str += p.ToString()
 		}
 	}
-	str += "Вартість: " + strconv.FormatFloat(basket.Sum, 'f', 2, 64) + "\n"
+	str += "\nВартість: " + strconv.FormatFloat(basket.Sum, 'f', 2, 64) + "\n\n"
+	if basket.Status != New {
+		str += basket.Status.ToString() + "\n"
+	}
 	return str
 }
 
+func (state *UsersState) ToString() string {
+	fmt.Println(len(state.Baskets), " ", state.Current)
+	basket := state.Baskets[state.Current]
+	return basket.ToString()
+}
+
 func (p *Purchase) ToString() string {
-	return p.Product.Product.Name + " " + strconv.Itoa(p.Count) + "\n"
+	return strconv.Itoa(p.Count) + p.Product.Product.Name + " " + "\n"
 }
