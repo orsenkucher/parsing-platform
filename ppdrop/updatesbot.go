@@ -82,7 +82,6 @@ func (u *Sub) Update(s *Server) {
 			if purch.Count > 0 {
 				purch.Count--
 				basket.Sum -= product.Product.Price
-				s.Bot.UpdateMsg(state.GenerateMsg())
 				if purch.Count == 0 {
 					purchases := make([]*Purchase, 0, len(basket.Purchases)-1)
 					for _, p := range basket.Purchases {
@@ -92,6 +91,7 @@ func (u *Sub) Update(s *Server) {
 					}
 					basket.Purchases = purchases
 				}
+				s.Bot.UpdateMsg(state.GenerateMsg())
 			}
 			return
 		}
