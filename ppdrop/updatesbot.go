@@ -146,12 +146,13 @@ type CheckUser struct {
 }
 
 func (u *CheckUser) Update(s *Server) {
-	if state, ok := s.UsersStates[u.ChatID]; !ok {
+	state, ok := s.UsersStates[u.ChatID]
+	if !ok {
 		fmt.Print(state)
 		state = &UsersState{State: s.Tree.Next["home"], Baskets: make(map[uint64]*Basket), ChatID: u.ChatID}
 		s.UsersStates[u.ChatID] = state
-		s.Bot.UpdateMsg(state.GenerateMsg())
 	}
+	s.Bot.UpdateMsg(state.GenerateMsg())
 }
 
 type AgreeHome struct {
