@@ -113,12 +113,14 @@ func (b *Bot) EditMessages(mm ...tgbotapi.MessageConfig) {
 	// for i, m := range mm {
 	cid := m.ChatID
 	prev := b.shipLog[cid][i]
-	em := tgbotapi.NewEditMessageText(cid, prev, m.Text)
-	if m.ReplyMarkup != nil {
-		em.ReplyMarkup = m.ReplyMarkup.(*tgbotapi.InlineKeyboardMarkup)
-	}
-	ds := defferedShipment{chatID: m.ChatID, cargo: em}
+	// em := tgbotapi.NewEditMessageText(cid, prev, m.Text)
+	// if m.ReplyMarkup != nil {
+	// 	em.ReplyMarkup = m.ReplyMarkup.(*tgbotapi.InlineKeyboardMarkup)
+	// }
+	dm := tgbotapi.NewDeleteMessage(cid, prev)
+	ds := defferedShipment{chatID: m.ChatID, cargo: dm}
 	b.shipToGrid(ds)
+	b.shipToGrid(defferedShipment{chatID: m.ChatID, cargo: m})
 	// 	dss = append(dss, ds)
 	// }
 }

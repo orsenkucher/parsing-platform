@@ -103,7 +103,7 @@ func (s *State) showBasketToUser(chatID int64) StateFn {
 		),
 	)
 	msg.ReplyMarkup = btn
-	s.sender.WriteMessages(msg)
+	s.sender.EditMessages(msg)
 	return s.confirm
 }
 
