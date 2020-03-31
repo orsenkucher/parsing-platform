@@ -86,13 +86,13 @@ func (b *Bot) UpdateMsg(msg tgbotapi.MessageConfig) {
 		updatemsg := tgbotapi.NewEditMessageText(msg.ChatID, prevID, msg.Text)
 		updatemsg.ReplyMarkup = msg.ReplyMarkup.(*tgbotapi.InlineKeyboardMarkup)
 		_, err := b.api.Send(updatemsg)
-		if err != nil {
+		if err != nil && err.Error() != "Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message" {
 			fmt.Println(err)
-			// msgtg, err := b.api.Send(msg)
-			// b.UsersMsg[msg.ChatID] = msgtg.MessageID
-			// if err != nil {
-			// 	fmt.Println(err)
-			// }
+			msgtg, err := b.api.Send(msg)
+			b.UsersMsg[msg.ChatID] = msgtg.MessageID
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
 	} else {
 		msgtg, err := b.api.Send(msg)
