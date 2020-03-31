@@ -20,7 +20,7 @@ func NewState(sender Sender) *State {
 		sender:  sender,
 		workers: make(map[int64]int),
 	}
-	sender.Bind(s.bind)
+	go sender.Bind(s.bind)
 	return s
 }
 
