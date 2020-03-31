@@ -116,7 +116,7 @@ type HomeReq struct {
 func (u *HomeReq) Update(s *Server) {
 	state := s.GetState(u.ChatID)
 	state.State = s.Tree.Next["home"]
-	if state.Baskets[state.Current].Status == New {
+	if state.Current != 0 && state.Baskets[state.Current].Status == New {
 		delete(state.Baskets, state.Current)
 	}
 	state.Current = 0
