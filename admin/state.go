@@ -12,7 +12,12 @@ type StateFn func(tgbotapi.Update) StateFn
 type State struct {
 	sender  Sender
 	workers map[int64]int
-	basket  string
+	bask    basket
+}
+
+type basket struct {
+	content  string
+	callback func(string)
 }
 
 func NewState(sender Sender) *State {
@@ -24,10 +29,10 @@ func NewState(sender Sender) *State {
 	return s
 }
 
-func (s *State) Basket(basket string) {
-	s.basket = basket
+func (s *State) Basket(content string, callback func(confimedBy string)) {
+	s.bask = basket{content: content, callback: callback}
 	fmt.Println("Basket set")
-	fmt.Println(basket)
+	fmt.Println(content)
 	for cid := range s.workers {
 		s.showBasketToUser(cid)
 	}
@@ -53,7 +58,8 @@ func (s *State) start(upd tgbotapi.Update) StateFn {
 }
 
 var workers = map[string]bool{
-	"380962475522": true,
+	"380962475522":  true,
+	"+380962475522": true,
 }
 
 func (s *State) phone(upd tgbotapi.Update) StateFn {
@@ -85,18 +91,18 @@ func (s *State) showBasket(upd tgbotapi.Update) StateFn {
 }
 
 func (s *State) showBasketToUser(chatID int64) StateFn {
-	if s.basket == "" {
+	if s.bask.content == "" {
 		s.sender.WriteMessages(tgbotapi.NewMessage(chatID, "Новых заказов нет"))
 		return s.showBasket
 	}
-	msg := tgbotapi.NewMessage(chatID, fmt.Sprintf("Текущие заказы\n%s", s.basket))
+	msg := tgbotapi.NewMessage(chatID, fmt.Sprintf("Текущие заказы\n%s", s.bask.content))
 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("Выполнить", "confirm"),
 			// tgbotapi.NewInlineKeyboardButtonData("Отменить","reject"),
 		),
 	)
-	s.sender.WriteMessages(msg)
+	s.sender.EditMessages(msg)
 	return s.confirm
 }
 
@@ -109,6 +115,7 @@ func (s *State) confirm(upd tgbotapi.Update) StateFn {
 	}
 	cid := chatID(upd)
 	fmt.Println(cid)
+	s.bask.callback(upd.CallbackQuery.Message.Chat.UserName)
 	return s.showBasketToUser(cid)
 }
 
