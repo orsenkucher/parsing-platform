@@ -16,20 +16,37 @@ type Editor interface {
 	EditMessages(...tgbotapi.EditMessageTextConfig)
 }
 
+type Binder interface {
+	Bind(func(tgbotapi.UpdatesChannel))
+}
+
 // ChatManager
 type Sender interface {
 	Writer
 	Editor
+	Binder
 }
 
-type Binder interface {
-	Bind(tgbotapi.UpdatesChannel, Sender)
-	// Bind2(func (tgbotapi.Update))
+type Bot struct {
+	api  *tgbotapi.BotAPI
+	cfg  encio.Config
+	updc chan tgbotapi.Update
+
+	shipMaster chan defferedShipment // main message channel
+	shipBackup chan defferedShipment // reserve channel
+	shipTime   map[int64]int64       // last sent time
+	shipLog    map[int64][]int       // sent history
 }
 
-func NewBot(cfg encio.Config, binder Binder) *Bot {
+type defferedShipment struct {
+	chatID int64
+	cargo  tgbotapi.Chattable
+}
+
+func NewBot(cfg encio.Config) *Bot {
 	bot := &Bot{
 		cfg:        cfg,
+		updc:       make(chan tgbotapi.Update),
 		shipLog:    make(map[int64][]int),
 		shipTime:   make(map[int64]int64),
 		shipMaster: make(chan defferedShipment, 1000),
@@ -37,7 +54,7 @@ func NewBot(cfg encio.Config, binder Binder) *Bot {
 	}
 	bot.init()
 	go bot.processMessages()
-	go bot.listen(binder)
+	go bot.listen()
 	return bot
 }
 
@@ -57,16 +74,13 @@ func (b *Bot) init() {
 	}
 }
 
-func (b *Bot) listen(binder Binder) {
+func (b *Bot) listen() {
 	ucfg := tgbotapi.NewUpdate(0)
 	ucfg.Timeout = 60
 	updates, err := b.api.GetUpdatesChan(ucfg)
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	pipe := make(chan tgbotapi.Update)
-	go binder.Bind(pipe, b)
 	for update := range updates {
 		if update.Message != nil {
 			if update.Message.Text != "" {
@@ -77,26 +91,15 @@ func (b *Bot) listen(binder Binder) {
 			}
 			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 		}
-		pipe <- update
+		b.updc <- update
 	}
 }
 
-type Bot struct {
-	api *tgbotapi.BotAPI
-	cfg encio.Config
-
-	shipMaster chan defferedShipment // main message channel
-	shipBackup chan defferedShipment // reserve channel
-	shipTime   map[int64]int64       // last sent time
-	shipLog    map[int64][]int       // sent history
-}
-
-type defferedShipment struct {
-	chatID int64
-	cargo  tgbotapi.Chattable
-}
-
 var _ Sender = (*Bot)(nil)
+
+func (b *Bot) Bind(bindFn func(tgbotapi.UpdatesChannel)) {
+	bindFn(b.updc)
+}
 
 func (b *Bot) WriteMessages(mm ...tgbotapi.MessageConfig) {
 	for _, m := range mm {

@@ -8,19 +8,20 @@ import (
 )
 
 // Такс, сначала пишем просто. Потом выносим композицию
-func AdminBot(key encio.EncIO) *Bot {
+func AdminBot(key encio.EncIO) *State {
 	fmt.Println("============AdminBot============")
 	cfg := cfg(key, "creds/admin.bot.json")
-	binder := NewState()
-	bot := NewBot(cfg, binder)
-	return bot
+	bot := NewBot(cfg)
+	state := NewState(bot)
+	return state
 }
 
-func ClientBot(key encio.EncIO, binder Binder) *Bot {
+func ClientBot(key encio.EncIO) *State {
 	fmt.Println("============ClientBot============")
 	cfg := cfg(key, "creds/client.bot.json")
-	bot := NewBot(cfg, binder)
-	return bot
+	bot := NewBot(cfg)
+	state := NewState(bot)
+	return state
 }
 
 func cfg(key encio.EncIO, path string) encio.Config {
