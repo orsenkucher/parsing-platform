@@ -31,10 +31,10 @@ func (s *State) bind(upds tgbotapi.UpdatesChannel) {
 
 func (s *State) start(upd tgbotapi.Update) StateFn {
 	msg := tgbotapi.NewMessage(chatID(upd), "Жду твой номер, бро🤫")
-	// btn := tgbotapi.NewKeyboardButtonLocation("Send to bot")
+	// btn := tgbotapi.NewKeyboardButtonLocation("Локация")
 	btn := tgbotapi.NewKeyboardButtonContact("Отправить номер")
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(btn))
-	s.sender.WriteMessages(msg)
+	s.sender.WriteMessages(msg, msg, msg)
 	return s.phone
 }
 
@@ -46,8 +46,10 @@ func (s *State) phone(upd tgbotapi.Update) StateFn {
 	fmt.Println(cont)
 	msg := tgbotapi.NewMessage(chatID(upd), "Отлично")
 	btn := tgbotapi.NewRemoveKeyboard(false)
-	msg.ReplyMarkup = btn
-	s.sender.EditMessages(msg, tgbotapi.NewMessage(chatID(upd), fmt.Sprint(cont)))
+	msg.ReplyMarkup = btn //TODO
+	s.sender.WriteMessages(msg, tgbotapi.NewMessage(chatID(upd), fmt.Sprint(cont)))
+	// s.sender.EditMessages(msg)
+	// s.sender.WriteMessages(tgbotapi.NewMessage(chatID(upd), fmt.Sprint(cont)))
 	return s.start
 }
 
