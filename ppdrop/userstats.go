@@ -90,21 +90,22 @@ func (state *UsersState) HomeBtn() tgbotapi.InlineKeyboardMarkup {
 		rows = append(rows, []tgbotapi.InlineKeyboardButton{button})
 	}
 
-	button := tgbotapi.NewInlineKeyboardButtonData("➕", "newbasket\n")
+	button := tgbotapi.NewInlineKeyboardButtonData("➕ Новый заказ", "newbasket\n")
 	rows = append(rows, []tgbotapi.InlineKeyboardButton{button})
 
 	return tgbotapi.NewInlineKeyboardMarkup(rows...)
 }
 
 func (state *UsersState) LocationMsg() string {
-	return "Выберите новую локацию на карте:"
+	return "Выберите магазин:"
 }
 
 func (state *UsersState) LocationBtn() tgbotapi.InlineKeyboardMarkup {
-	urlbutton := tgbotapi.NewInlineKeyboardButtonURL("🗺 OpenMap", fmt.Sprintf("https://map-bot.abmcloud.com/#/?chatid=%v", state.ChatID))
-	location := tgbotapi.NewInlineKeyboardButtonData("🏠", "home\n")
+	urlbutton := tgbotapi.NewInlineKeyboardButtonURL("🗺 На карте", fmt.Sprintf("https://map-bot.abmcloud.com/#/?chatid=%v", state.ChatID))
+	listbutton := tgbotapi.NewInlineKeyboardButtonData("📖 Из списка", "home\n")
+	location := tgbotapi.NewInlineKeyboardButtonData("🏠 Назад", "home\n")
 
-	rows := [][]tgbotapi.InlineKeyboardButton{[]tgbotapi.InlineKeyboardButton{urlbutton}, []tgbotapi.InlineKeyboardButton{location}}
+	rows := [][]tgbotapi.InlineKeyboardButton{[]tgbotapi.InlineKeyboardButton{urlbutton, listbutton}, []tgbotapi.InlineKeyboardButton{location}}
 	return tgbotapi.NewInlineKeyboardMarkup(rows...)
 }
 
