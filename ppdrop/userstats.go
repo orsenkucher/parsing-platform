@@ -35,8 +35,8 @@ func (state *UsersState) GenerateMsg() tgbotapi.MessageConfig {
 		Btns := state.AgreeBtn()
 		tgmsg.ReplyMarkup = &Btns
 	} else if state.Baskets[state.Current].Status != New {
-		tgmsg = tgbotapi.NewMessage(state.ChatID, state.AgreeMsg())
-		Btns := state.AgreeBtn()
+		tgmsg = tgbotapi.NewMessage(state.ChatID, state.BasketStatusMsg())
+		Btns := state.BasketStatusBtn()
 		tgmsg.ReplyMarkup = &Btns
 	} else {
 		tgmsg = tgbotapi.NewMessage(state.ChatID, state.BasketMsg())
