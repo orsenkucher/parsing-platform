@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -120,7 +121,9 @@ func (b *Bot) EditMessages(mm ...tgbotapi.MessageConfig) {
 	cid := m.ChatID
 	prev := b.shipLog[cid][i]
 	em := tgbotapi.NewEditMessageText(cid, prev, m.Text)
-	em.ReplyMarkup = m.ReplyMarkup.(*tgbotapi.InlineKeyboardMarkup)
+	if m.ReplyMarkup != nil {
+		em.ReplyMarkup = m.ReplyMarkup.(*tgbotapi.InlineKeyboardMarkup)
+	}
 	ds := defferedShipment{chatID: m.ChatID, cargo: em}
 	b.shipToGrid(ds)
 	// 	dss = append(dss, ds)
@@ -132,61 +135,54 @@ func (b *Bot) shipToGrid(ds defferedShipment) {
 	if !ok {
 		c = make(chan defferedShipment, 10)
 		b.shipGrid[ds.chatID] = c
-	}
-	if len(c) == 0 {
+		// c <- ds
 		go func() {
-			timer := time.NewTicker(time.Second)
-			for range timer.C {
+			for {
+				ok, delay := b.ready(ds.chatID)
+				if !ok {
+					fmt.Println("SLEEP", delay)
+					time.Sleep(time.Duration(delay))
+				}
 				select {
 				case ds := <-c:
+					fmt.Println("TO HIGHWAY")
+					b.shipTime[ds.chatID] = time.Now().UnixNano()
 					b.shipHighway <- ds
 				default:
-					// b.shipGrid[ds.chatID] = nil // THINK
-					// delete(b.shipGrid, ds.chatID)
+					delete(b.shipGrid, ds.chatID) // THINK
+					fmt.Println("EXITED")
 					return
 				}
 			}
 		}()
 	}
-	c <- ds
+	// if len(c) == 0 // USE waitGroups?
+	c <- ds // WHAT IF c is voided??? TODO
 }
 
-func (b *Bot) deliver(ds defferedShipment) error {
-	b.shipTime[ds.chatID] = time.Now().UnixNano()
-	m, err := b.api.Send(ds.cargo)
-	b.shipLog[ds.chatID] = append(b.shipLog[ds.chatID], m.MessageID)
-	return err
+// Grid is ready to deliver user's cargo
+func (b *Bot) ready(chatID int64) (ok bool, delta int64) {
+	if t, ok := b.shipTime[chatID]; ok {
+		delta = int64(time.Second) + t - time.Now().UnixNano()
+		fmt.Println("delta", delta)
+		return delta <= 0, delta
+	}
+	return true, 0
 }
 
 // TODO handle errors
 func (b *Bot) processMessages() {
 	timer := time.NewTicker(time.Second / 30)
 	for range timer.C {
+		fmt.Println("TICK")
 		ds := <-b.shipHighway
 		b.deliver(ds)
-		// select {
-		// case cargo := <-b.shipMaster:
-		// 	if ok, delta := b.userCanReceiveMessage(cargo.chatID); !ok {
-		// 		go func() {
-		// 			time.Sleep(time.Duration(delta))
-		// 			b.shipBackup <- cargo
-		// 		}()
-		// 	} else {
-		// 		b.sendMessage(cargo)
-		// 	}
-		// case defferedCargo := <-b.shipBackup:
-		// 	b.sendMessage(defferedCargo)
-		// }
 	}
 }
 
-// TODO do this better
-func (b *Bot) userCanReceiveMessage(userId int64) (can bool, delta int64) {
-	if t, ok := b.shipTime[userId]; ok {
-		delta = time.Now().UnixNano() - t
-		can = delta >= int64(time.Second)
-		return
-	} else {
-		return !can, delta
-	}
+func (b *Bot) deliver(ds defferedShipment) error {
+	// b.shipTime[ds.chatID] = time.Now().UnixNano()
+	m, err := b.api.Send(ds.cargo)
+	b.shipLog[ds.chatID] = append(b.shipLog[ds.chatID], m.MessageID)
+	return err
 }
