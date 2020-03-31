@@ -9,8 +9,19 @@ import (
 )
 
 func (b *Bot) HandleMessage(chatid int64, text string) {
-	fmt.Print("CheckUser")
-	b.Updates <- &CheckUser{ChatID: chatid}
+	if text != "/start" {
+		b.Updates <- &CheckUser{ChatID: chatid}
+	} else {
+		tgmsg := tgbotapi.NewMessage(chatid, `Здравствуйте, я бот "Забирай сам"
+		Здесь можно заказать товар в ближайшем к вам магазине.
+		Выбирайте нужный магазин, заказывайте товар.  Сотрудник магазина получит и соберет ваш заказ. После этого вы сможете забрать пакет с товаром без очереди или у окна выдачи магазина по номеру заказа.`)
+		button := tgbotapi.NewInlineKeyboardButtonData("Заберу сам", "newbasket\n")
+		rows := [][]tgbotapi.InlineKeyboardButton{}
+		rows = append(rows, []tgbotapi.InlineKeyboardButton{button})
+		buttons := tgbotapi.NewInlineKeyboardMarkup(rows...)
+		tgmsg.ReplyMarkup = &buttons
+		b.ResendMsg(tgmsg)
+	}
 }
 
 func (b *Bot) handleCallback(update tgbotapi.Update) {

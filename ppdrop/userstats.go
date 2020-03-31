@@ -90,7 +90,7 @@ func (state *UsersState) HomeBtn() tgbotapi.InlineKeyboardMarkup {
 		rows = append(rows, []tgbotapi.InlineKeyboardButton{button})
 	}
 
-	button := tgbotapi.NewInlineKeyboardButtonData("+", "newbasket\n")
+	button := tgbotapi.NewInlineKeyboardButtonData("➕", "newbasket\n")
 	rows = append(rows, []tgbotapi.InlineKeyboardButton{button})
 
 	return tgbotapi.NewInlineKeyboardMarkup(rows...)
@@ -154,19 +154,20 @@ func (state *UsersState) productButtons(products []*ProdTree) [][]tgbotapi.Inlin
 			button := tgbotapi.NewInlineKeyboardButtonData(text, "change\n"+path)
 			rows = append(rows, []tgbotapi.InlineKeyboardButton{button})
 		} else {
-			button := tgbotapi.NewInlineKeyboardButtonData(text+" "+strconv.FormatFloat(node.Product.Price, 'f', 2, 64), "\n")
-			addButton := tgbotapi.NewInlineKeyboardButtonData("+", "add\n"+path)
-			subButton := tgbotapi.NewInlineKeyboardButtonData("-", "sub\n"+path)
+			button := tgbotapi.NewInlineKeyboardButtonData(text, "\n")
+			addButton := tgbotapi.NewInlineKeyboardButtonData("➕", "add\n"+path)
+			price := tgbotapi.NewInlineKeyboardButtonData(strconv.FormatFloat(node.Product.Price, 'f', 2, 64), "\n")
+			subButton := tgbotapi.NewInlineKeyboardButtonData("➖", "sub\n"+path)
 			count := 0
 			for _, p := range basket.Purchases {
 				if p.Product == node {
 					count = p.Count
 				}
 			}
-			countButton := tgbotapi.NewInlineKeyboardButtonData(strconv.Itoa(count), "\n")
+			countButton := tgbotapi.NewInlineKeyboardButtonData(strconv.Itoa(count)+"шт", "\n")
 
 			rows = append(rows, []tgbotapi.InlineKeyboardButton{button})
-			rows = append(rows, []tgbotapi.InlineKeyboardButton{subButton, countButton, addButton})
+			rows = append(rows, []tgbotapi.InlineKeyboardButton{subButton, price, countButton, addButton})
 		}
 	}
 	if back := state.State.Prev; back != nil && back.Product.Name != "root" {
