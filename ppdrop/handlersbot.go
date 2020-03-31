@@ -15,6 +15,9 @@ func (b *Bot) HandleMessage(chatid int64, text string) {
 
 func (b *Bot) handleCallback(update tgbotapi.Update) {
 	if id, ok := b.UsersMsg[update.CallbackQuery.Message.Chat.ID]; !ok || id != update.CallbackQuery.Message.MessageID {
+		if !ok {
+			b.Updates <- &CheckUser{ChatID: update.CallbackQuery.Message.Chat.ID}
+		}
 		return
 	}
 	data := strings.Split(update.CallbackQuery.Data, "\n")
@@ -34,6 +37,9 @@ func (b *Bot) handleCallback(update tgbotapi.Update) {
 	}
 	if data[0] == "home" {
 		b.Updates <- &HomeReq{ChatID: ChatID}
+	}
+	if data[0] == "agree" {
+		b.Updates <- &AgreeHome{ChatID: ChatID}
 	}
 	if data[0] == "newbasket" {
 		b.Updates <- &NewBasket{ChatID: ChatID}

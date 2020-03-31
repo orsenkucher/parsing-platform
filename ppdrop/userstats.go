@@ -30,6 +30,10 @@ func (state *UsersState) GenerateMsg() tgbotapi.MessageConfig {
 		tgmsg = tgbotapi.NewMessage(state.ChatID, state.LocationMsg())
 		btms := state.LocationBtm()
 		tgmsg.ReplyMarkup = &btms
+	} else if state.State.Product.Name == "agree" {
+		tgmsg = tgbotapi.NewMessage(state.ChatID, state.AgreeMsg())
+		btms := state.AgreeBtm()
+		tgmsg.ReplyMarkup = &btms
 	} else {
 		tgmsg = tgbotapi.NewMessage(state.ChatID, state.BasketMsg())
 		btms := state.TreeBtm()
@@ -38,8 +42,23 @@ func (state *UsersState) GenerateMsg() tgbotapi.MessageConfig {
 	return tgmsg
 }
 
+func (state *UsersState) AgreeMsg() string {
+	return "Вы уверенны, что хотите выйти в главное меню?\n При выходе из неотправленной корзины!!!"
+}
+
+func (state *UsersState) AgreeBtm() tgbotapi.InlineKeyboardMarkup {
+	rows := [][]tgbotapi.InlineKeyboardButton{}
+
+	catalog := tgbotapi.NewInlineKeyboardButtonData("Вернуться к заказу", "catalog\n")
+	home := tgbotapi.NewInlineKeyboardButtonData("В меню", "home\n")
+	rows = append(rows, []tgbotapi.InlineKeyboardButton{catalog})
+	rows = append(rows, []tgbotapi.InlineKeyboardButton{home})
+
+	return tgbotapi.NewInlineKeyboardMarkup(rows...)
+}
+
 func (state *UsersState) HomeMsg() string {
-	return "Ваши закази:"
+	return "Ваши заказы:"
 }
 
 func (state *UsersState) HomeBtm() tgbotapi.InlineKeyboardMarkup {
@@ -63,8 +82,9 @@ func (state *UsersState) LocationMsg() string {
 
 func (state *UsersState) LocationBtm() tgbotapi.InlineKeyboardMarkup {
 	urlbutton := tgbotapi.NewInlineKeyboardButtonURL("🗺 OpenMap", fmt.Sprintf("https://map-bot.abmcloud.com/#/?chatid=%v", state.ChatID))
+	location := tgbotapi.NewInlineKeyboardButtonData("🏠", "home\n")
 
-	rows := [][]tgbotapi.InlineKeyboardButton{[]tgbotapi.InlineKeyboardButton{urlbutton}}
+	rows := [][]tgbotapi.InlineKeyboardButton{[]tgbotapi.InlineKeyboardButton{urlbutton}, []tgbotapi.InlineKeyboardButton{location}}
 	return tgbotapi.NewInlineKeyboardMarkup(rows...)
 }
 
@@ -137,7 +157,7 @@ func (state *UsersState) productButtons(products []*ProdTree) [][]tgbotapi.Inlin
 
 func (state *UsersState) lowButtons() []tgbotapi.InlineKeyboardButton {
 	menu := tgbotapi.NewInlineKeyboardButtonData("📖", "catalog\n")
-	location := tgbotapi.NewInlineKeyboardButtonData("🏠", "home\n")
+	location := tgbotapi.NewInlineKeyboardButtonData("🏠", "agree\n")
 	basket := tgbotapi.NewInlineKeyboardButtonData("🧺 "+strconv.FormatFloat(state.Baskets[state.Current].Sum, 'f', 2, 64), "basket\n")
 	return []tgbotapi.InlineKeyboardButton{menu, location, basket}
 }

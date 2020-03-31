@@ -24,7 +24,7 @@ func (u *NewLocation) Update(s *Server) {
 		}
 		_, ok = state.Baskets[u.Location]
 		if !ok {
-			state.Baskets[u.Location] = &Basket{Location: u.Location, Purchases: []*Purchase{}}
+			state.Baskets[u.Location] = &Basket{Location: u.Location, Purchases: []*Purchase{}, Status: New}
 		}
 		state.Current = u.Location
 		state.State = s.Tree.Next[locstr]
@@ -116,6 +116,9 @@ type HomeReq struct {
 func (u *HomeReq) Update(s *Server) {
 	state := s.GetState(u.ChatID)
 	state.State = s.Tree.Next["home"]
+	if state.Baskets[state.Current].Status == New {
+		delete(state.Baskets, state.Current)
+	}
 	state.Current = 0
 	s.Bot.UpdateMsg(state.GenerateMsg())
 }
@@ -140,6 +143,16 @@ func (u *CheckUser) Update(s *Server) {
 		s.UsersStates[u.ChatID] = state
 		s.Bot.UpdateMsg(state.GenerateMsg())
 	}
+}
+
+type AgreeHome struct {
+	ChatID int64
+}
+
+func (u *AgreeHome) Update(s *Server) {
+	state := s.GetState(u.ChatID)
+	state.State = s.Tree.Next["agree"]
+	s.Bot.UpdateMsg(state.GenerateMsg())
 }
 
 type NewBasket struct {
