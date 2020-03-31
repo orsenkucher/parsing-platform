@@ -20,6 +20,7 @@ func main() {
 		go bot.Listen()
 		//go admin.Listen()
 		adm := admin.AdminBot(key)
+		fmt.Println("Serving..")
 		ppdrop.StartServer(bot, adm)
 	} else {
 		a := admin.AdminBot(key)
