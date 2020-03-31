@@ -111,9 +111,11 @@ func (s *State) confirm(upd tgbotapi.Update) StateFn {
 	if upd.CallbackQuery == nil {
 		return s.confirm
 	}
+	fmt.Println(upd.CallbackQuery.Data)
 	if upd.CallbackQuery.Data != "confirm" {
 		return s.confirm
 	}
+	fmt.Println("CONFIRMED")
 	cid := chatID(upd)
 	fmt.Println(cid)
 	s.bask.callback(upd.CallbackQuery.Message.Chat.UserName)
