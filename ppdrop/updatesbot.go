@@ -189,6 +189,7 @@ func (u *SendBasket) Update(s *Server) {
 	state.State = s.Tree.Next["home"]
 	state.Current = 0
 	s.Bot.UpdateMsg(state.GenerateMsg())
+	s.Admin.Basket(basket.ToString())
 }
 
 func (s *Server) GetState(ChatID int64) *UsersState {

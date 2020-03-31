@@ -9,11 +9,13 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/orsenkucher/parsing-platform/admin"
 )
 
 type Server struct {
 	Bot         *Bot
-	Admin       *Bot
+	Admin       *admin.State
 	UsersStates map[int64]*UsersState
 	Updates     chan Update
 	Tree        *ProdTree
@@ -26,8 +28,13 @@ func (s *Server) Listen() {
 	}
 }
 
-func StartServer(bot *Bot, admin *Bot) {
-	s := Server{Bot: bot, UsersStates: make(map[int64]*UsersState), Updates: make(chan Update), Tree: GenerateTree()}
+func StartServer(bot *Bot, admin *admin.State) {
+	s := Server{Bot: bot,
+		UsersStates: make(map[int64]*UsersState),
+		Updates:     make(chan Update),
+		Tree:        GenerateTree(),
+		Admin:       admin,
+	}
 	s.LoadData()
 	for store := range s.Tree.Next {
 		fmt.Println(store)
