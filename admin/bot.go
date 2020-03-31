@@ -84,12 +84,12 @@ func (b *Bot) listen() {
 	for update := range updates {
 		if update.Message != nil {
 			if update.Message.Text != "" {
-				delcfg := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
-				if _, err := b.api.DeleteMessage(delcfg); err != nil {
-					log.Println(err)
-				}
+				log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 			}
-			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+			delcfg := tgbotapi.NewDeleteMessage(update.Message.Chat.ID, update.Message.MessageID)
+			if _, err := b.api.DeleteMessage(delcfg); err != nil {
+				log.Println(err)
+			}
 		}
 		b.updc <- update
 	}
@@ -185,7 +185,7 @@ func (b *Bot) shipToGrid(ds defferedShipment) {
 // Grid is ready to deliver user's cargo
 func (b *Bot) ready(chatID int64) (ok bool, delta int64) {
 	if t, ok := b.shipTime[chatID]; ok {
-		delta = int64(time.Second/2) + t - time.Now().UnixNano()
+		delta = int64(time.Second/3) + t - time.Now().UnixNano()
 		return delta <= 0, delta
 	}
 	return true, 0

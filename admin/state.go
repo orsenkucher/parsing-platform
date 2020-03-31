@@ -2,6 +2,7 @@ package admin
 
 import (
 	"fmt"
+	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -9,14 +10,14 @@ import (
 type StateFn func(tgbotapi.Update) StateFn
 
 type State struct {
-	sender Sender
-	users  map[int64]int
+	sender  Sender
+	workers map[int64]int
 }
 
 func NewState(sender Sender) *State {
 	s := &State{
-		sender: sender,
-		users:  make(map[int64]int),
+		sender:  sender,
+		workers: make(map[int64]int),
 	}
 	sender.Bind(s.bind)
 	return s
@@ -30,30 +31,45 @@ func (s *State) bind(upds tgbotapi.UpdatesChannel) {
 }
 
 func (s *State) start(upd tgbotapi.Update) StateFn {
-	for i := 1; i < 5; i++ {
-		txt := fmt.Sprintf("[%v] Жду твой номер, бро🤫", i)
-		msg := tgbotapi.NewMessage(chatID(upd), txt)
-		// btn := tgbotapi.NewKeyboardButtonLocation("Локация")
-		btn := tgbotapi.NewKeyboardButtonContact("Отправить номер")
-		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(btn))
-		// s.sender.WriteMessages(msg, msg, msg, msg)
-		s.sender.WriteMessages(msg)
-	}
-	return s.start
+	// txt := fmt.Sprintf("[%v] Жду твой номер, бро🤫", i)
+
+	msg := tgbotapi.NewMessage(chatID(upd), "Подтверждение личности🗄")
+	// btn := tgbotapi.NewKeyboardButtonLocation("Локация")
+	btn := tgbotapi.NewKeyboardButtonContact("Отправить номер")
+	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(btn))
+	// s.sender.WriteMessages(msg, msg, msg, msg)
+	s.sender.WriteMessages(msg)
+	return s.phone
+}
+
+var workers = map[string]bool{
+	"380962475522": true,
 }
 
 func (s *State) phone(upd tgbotapi.Update) StateFn {
-	// msg := tgbotapi.NewMessage(chatID(upd), "Great")
-	// edt := tgbotapi.NewEditMessageText()
-	// s.sender.EditMessages()
 	cont := upd.Message.Contact
+	if cont == nil {
+		return s.start(upd)
+	}
+
 	fmt.Println(cont)
-	msg := tgbotapi.NewMessage(chatID(upd), "Отлично")
 	btn := tgbotapi.NewRemoveKeyboard(false)
-	msg.ReplyMarkup = btn //TODO
-	s.sender.WriteMessages(msg, tgbotapi.NewMessage(chatID(upd), fmt.Sprint(cont)))
-	// s.sender.EditMessages(msg)
-	// s.sender.WriteMessages(tgbotapi.NewMessage(chatID(upd), fmt.Sprint(cont)))
+	if !workers[cont.PhoneNumber] {
+		log.Println("Worker not registered")
+		msg := tgbotapi.NewMessage(chatID(upd), "Вы тут не работаете🤨.\nНо очень советуем заглянуть в @ppdropbot😉")
+		msg.ReplyMarkup = btn
+		s.sender.WriteMessages(msg)
+		return s.start
+	}
+	log.Println("Woker connected!")
+	s.workers[chatID(upd)] = 1
+	msg := tgbotapi.NewMessage(chatID(upd), fmt.Sprintf("%v🤟", cont.FirstName))
+	msg.ReplyMarkup = btn
+	s.sender.WriteMessages(msg)
+
+	msg = tgbotapi.NewMessage(chatID(upd), fmt.Sprintf("Текущие заказы\n%s", cont.FirstName))
+	s.sender.WriteMessages(msg)
+
 	return s.start
 }
 
