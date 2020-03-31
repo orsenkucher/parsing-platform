@@ -123,7 +123,7 @@ func (state *UsersState) BasketBtn() tgbotapi.InlineKeyboardMarkup {
 	}
 
 	rows = state.productButtons(products)
-	rows = append(rows, state.lowButtons())
+	rows = append(rows, state.lowButtons()...)
 
 	return tgbotapi.NewInlineKeyboardMarkup(rows...)
 }
@@ -137,7 +137,7 @@ func (state *UsersState) TreeBtn() tgbotapi.InlineKeyboardMarkup {
 	}
 
 	rows = state.productButtons(products)
-	rows = append(rows, state.lowButtons())
+	rows = append(rows, state.lowButtons()...)
 
 	return tgbotapi.NewInlineKeyboardMarkup(rows...)
 }
@@ -172,17 +172,22 @@ func (state *UsersState) productButtons(products []*ProdTree) [][]tgbotapi.Inlin
 		}
 	}
 	if back := state.State.Prev; back != nil && back.Product.Name != "root" {
-		rows = append(rows, []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("go back", "change\n"+back.GetHash())})
+		rows = append(rows, []tgbotapi.InlineKeyboardButton{tgbotapi.NewInlineKeyboardButtonData("Выбрать другую категорию", "change\n"+back.GetHash())})
 	}
 	return rows
 }
 
-func (state *UsersState) lowButtons() []tgbotapi.InlineKeyboardButton {
+func (state *UsersState) lowButtons() [][]tgbotapi.InlineKeyboardButton {
+	rows := [][]tgbotapi.InlineKeyboardButton{}
 	menu := tgbotapi.NewInlineKeyboardButtonData("📖", "catalog\n")
 	location := tgbotapi.NewInlineKeyboardButtonData("🏠", "agree\n")
 	basket := tgbotapi.NewInlineKeyboardButtonData("🧺 "+strconv.FormatFloat(state.Baskets[state.Current].Sum, 'f', 2, 64), "basket\n")
 	if state.State.Product.Name == "basket" {
-		basket = tgbotapi.NewInlineKeyboardButtonData("Отправить", "sendbasket\n")
+		basket = tgbotapi.NewInlineKeyboardButtonData("Отправить заказ ✅", "sendbasket\n")
+		rows = append(rows, []tgbotapi.InlineKeyboardButton{menu, location})
+		rows = append(rows, []tgbotapi.InlineKeyboardButton{basket})
+	} else {
+		rows = append(rows, []tgbotapi.InlineKeyboardButton{menu, location, basket})
 	}
-	return []tgbotapi.InlineKeyboardButton{menu, location, basket}
+	return rows
 }
