@@ -13,14 +13,16 @@ type State struct {
 	users  map[int64]int
 }
 
-func NewState() *State {
-	return &State{users: make(map[int64]int)}
+func NewState(sender Sender) *State {
+	s := &State{
+		sender: sender,
+		users:  make(map[int64]int),
+	}
+	sender.Bind(s.bind)
+	return s
 }
 
-var _ Binder = (*State)(nil)
-
-func (s *State) Bind(upds tgbotapi.UpdatesChannel, sender Sender) {
-	s.sender = sender
+func (s *State) bind(upds tgbotapi.UpdatesChannel) {
 	state := s.start
 	for upd := range upds {
 		state = state(upd)
