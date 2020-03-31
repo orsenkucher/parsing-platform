@@ -152,7 +152,7 @@ func (u *CheckUser) Update(s *Server) {
 		state = &UsersState{State: s.Tree.Next["home"], Baskets: make(map[uint64]*Basket), ChatID: u.ChatID}
 		s.UsersStates[u.ChatID] = state
 	}
-	s.Bot.UpdateMsg(state.GenerateMsg())
+	s.Bot.ResendMsg(state.GenerateMsg())
 }
 
 type AgreeHome struct {
@@ -172,7 +172,7 @@ type NewBasket struct {
 func (u *NewBasket) Update(s *Server) {
 	state := s.UsersStates[u.ChatID]
 	state.State = s.Tree
-	s.Bot.ResendMsg(state.GenerateMsg())
+	s.Bot.UpdateMsg(state.GenerateMsg())
 }
 
 func (s *Server) GetState(ChatID int64) *UsersState {
