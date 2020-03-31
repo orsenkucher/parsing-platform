@@ -11,7 +11,7 @@ type StateFn func(tgbotapi.Update) StateFn
 
 type State struct {
 	sender  Sender
-	workers map[int64]int
+	workers map[int64]string
 	bask    basket
 }
 
@@ -23,7 +23,7 @@ type basket struct {
 func NewState(sender Sender) *State {
 	s := &State{
 		sender:  sender,
-		workers: make(map[int64]int),
+		workers: make(map[int64]string),
 	}
 	go sender.Bind(s.bind)
 	return s
@@ -78,7 +78,7 @@ func (s *State) phone(upd tgbotapi.Update) StateFn {
 		return s.start
 	}
 	log.Println("Woker connected!")
-	s.workers[chatID(upd)] = 1
+	s.workers[chatID(upd)] = cont.FirstName
 	msg := tgbotapi.NewMessage(chatID(upd), fmt.Sprintf("%v🤟", cont.FirstName))
 	msg.ReplyMarkup = btn
 	s.sender.WriteMessages(msg)
@@ -118,7 +118,7 @@ func (s *State) confirm(upd tgbotapi.Update) StateFn {
 	fmt.Println("CONFIRMED")
 	cid := chatID(upd)
 	fmt.Println(cid)
-	s.bask.callback(upd.CallbackQuery.Message.Chat.UserName)
+	s.bask.callback(s.workers[cid])
 	return s.showBasketToUser(cid)
 }
 
