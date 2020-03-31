@@ -184,7 +184,8 @@ type SendBasket struct {
 
 func (u *SendBasket) Update(s *Server) {
 	state := s.GetState(u.ChatID)
-	state.Baskets[state.Current].Status = Sent
+	basket := state.Baskets[state.Current]
+	basket.Status = Sent
 	state.State = s.Tree.Next["home"]
 	state.Current = 0
 	s.Bot.UpdateMsg(state.GenerateMsg())

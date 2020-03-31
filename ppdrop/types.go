@@ -55,9 +55,7 @@ type Basket struct {
 	Sum       float64
 }
 
-func (state *UsersState) ToString() string {
-	fmt.Println(len(state.Baskets), " ", state.Current)
-	basket := state.Baskets[state.Current]
+func (basket *Basket) ToString() string {
 	str := Locations[basket.Location].Name + "\n\n"
 	for _, p := range basket.Purchases {
 		if p.Count > 0 {
@@ -69,6 +67,12 @@ func (state *UsersState) ToString() string {
 		str += basket.Status.ToString() + "\n"
 	}
 	return str
+}
+
+func (state *UsersState) ToString() string {
+	fmt.Println(len(state.Baskets), " ", state.Current)
+	basket := state.Baskets[state.Current]
+	return basket.ToString()
 }
 
 func (p *Purchase) ToString() string {
