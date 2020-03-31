@@ -49,7 +49,8 @@ func (b *Bot) handleCallback(update tgbotapi.Update) {
 		b.Updates <- &CatalogReq{ChatID: ChatID}
 	}
 	if data[0] == "reset" {
-		b.Updates <- &Reset{ChatID: ChatID}
+		loc, _ := strconv.ParseUint(data[1], 10, 64)
+		b.Updates <- &Reset{ChatID: ChatID, BasketID: loc}
 	}
 	if data[0] == "location" {
 		loc, _ := strconv.ParseUint(data[1], 10, 64)
