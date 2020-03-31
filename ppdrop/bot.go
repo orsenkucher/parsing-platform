@@ -88,11 +88,11 @@ func (b *Bot) UpdateMsg(msg tgbotapi.MessageConfig) {
 		_, err := b.api.Send(updatemsg)
 		if err != nil {
 			fmt.Println(err)
-			msgtg, err := b.api.Send(msg)
-			b.UsersMsg[msg.ChatID] = msgtg.MessageID
-			if err != nil {
-				fmt.Println(err)
-			}
+			// msgtg, err := b.api.Send(msg)
+			// b.UsersMsg[msg.ChatID] = msgtg.MessageID
+			// if err != nil {
+			// 	fmt.Println(err)
+			// }
 		}
 	} else {
 		msgtg, err := b.api.Send(msg)
