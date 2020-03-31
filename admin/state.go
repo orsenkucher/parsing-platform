@@ -102,8 +102,8 @@ func (s *State) showBasketToUser(chatID int64) StateFn {
 			// tgbotapi.NewInlineKeyboardButtonData("Отменить","reject"),
 		),
 	)
-	msg.ReplyMarkup = &btn
-	s.sender.EditMessages(msg)
+	msg.ReplyMarkup = btn
+	s.sender.WriteMessages(msg)
 	return s.confirm
 }
 
