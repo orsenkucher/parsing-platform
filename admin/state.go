@@ -30,12 +30,16 @@ func (s *State) bind(upds tgbotapi.UpdatesChannel) {
 }
 
 func (s *State) start(upd tgbotapi.Update) StateFn {
-	msg := tgbotapi.NewMessage(chatID(upd), "Жду твой номер, бро🤫")
-	// btn := tgbotapi.NewKeyboardButtonLocation("Локация")
-	btn := tgbotapi.NewKeyboardButtonContact("Отправить номер")
-	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(btn))
-	s.sender.WriteMessages(msg, msg, msg)
-	return s.phone
+	for i := 1; i < 5; i++ {
+		txt := fmt.Sprintf("[%v] Жду твой номер, бро🤫", i)
+		msg := tgbotapi.NewMessage(chatID(upd), txt)
+		// btn := tgbotapi.NewKeyboardButtonLocation("Локация")
+		btn := tgbotapi.NewKeyboardButtonContact("Отправить номер")
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(tgbotapi.NewKeyboardButtonRow(btn))
+		// s.sender.WriteMessages(msg, msg, msg, msg)
+		s.sender.WriteMessages(msg)
+	}
+	return s.start
 }
 
 func (s *State) phone(upd tgbotapi.Update) StateFn {

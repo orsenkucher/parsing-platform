@@ -101,13 +101,6 @@ func (b *Bot) Bind(bindFn func(tgbotapi.UpdatesChannel)) {
 	bindFn(b.updc)
 }
 
-func (b *Bot) WriteMessages(mm ...tgbotapi.MessageConfig) {
-	for _, m := range mm {
-		ds := defferedShipment{chatID: m.ChatID, cargo: m}
-		b.shipToGrid(ds)
-	}
-}
-
 func (b *Bot) EditMessages(mm ...tgbotapi.MessageConfig) {
 	if len(mm) > 1 {
 		panic(">=2 messages - not supported now")
@@ -130,41 +123,69 @@ func (b *Bot) EditMessages(mm ...tgbotapi.MessageConfig) {
 	// }
 }
 
+func (b *Bot) WriteMessages(mm ...tgbotapi.MessageConfig) {
+	for _, m := range mm {
+		ds := defferedShipment{chatID: m.ChatID, cargo: m}
+		fmt.Println("ADDED")
+		b.shipToGrid(ds)
+		// time.Sleep(time.Second / 4)
+		// time.Sleep(time.Second - time.Millisecond*700)
+		// time.Sleep(time.Millisecond)
+	}
+}
+
 func (b *Bot) shipToGrid(ds defferedShipment) {
 	c, ok := b.shipGrid[ds.chatID]
 	if !ok {
 		c = make(chan defferedShipment, 10)
 		b.shipGrid[ds.chatID] = c
+		fmt.Println("NEWCHANNEL")
+	}
+	// time.Sleep(time.Millisecond * 10) // DONT
+	c <- ds
+	if !ok {
 		// c <- ds
 		go func() {
 			for {
-				ok, delay := b.ready(ds.chatID)
-				if !ok {
-					fmt.Println("SLEEP", delay)
-					time.Sleep(time.Duration(delay))
-				}
+				// fmt.Println("IN FOR")
+				//wg.wait
 				select {
 				case ds := <-c:
+					fmt.Println("DS CASE")
+					ok, delay := b.ready(ds.chatID)
+					if !ok {
+						fmt.Println("SLEEP", time.Duration(delay))
+						time.Sleep(time.Duration(delay))
+					}
 					fmt.Println("TO HIGHWAY")
 					b.shipTime[ds.chatID] = time.Now().UnixNano()
 					b.shipHighway <- ds
 				default:
-					delete(b.shipGrid, ds.chatID) // THINK
-					fmt.Println("EXITED")
+					delete(b.shipGrid, ds.chatID)
+					close(c) // You'd better not send on this chan
+					fmt.Println("\tEXITED")
 					return
 				}
 			}
 		}()
-	}
+	} // else {
+	// fmt.Println("TOCHANNEL")
 	// if len(c) == 0 // USE waitGroups?
-	c <- ds // WHAT IF c is voided??? TODO
+	// fmt.Println("TOCHANNEL")
+	// time.Sleep(time.Millisecond)
+	// wg.one
+	// time.Sleep(time.Second * 2) // WILL SKIP ALL
+	// c <- ds // WHAT IF c is voided??? TODO
+	// PANIC for now
+	// YEEEEA(((
+	// wg.release
+	// }
 }
 
 // Grid is ready to deliver user's cargo
 func (b *Bot) ready(chatID int64) (ok bool, delta int64) {
 	if t, ok := b.shipTime[chatID]; ok {
-		delta = int64(time.Second) + t - time.Now().UnixNano()
-		fmt.Println("delta", delta)
+		delta = int64(time.Second/2) + t - time.Now().UnixNano()
 		return delta <= 0, delta
 	}
 	return true, 0
@@ -174,9 +195,12 @@ func (b *Bot) ready(chatID int64) (ok bool, delta int64) {
 func (b *Bot) processMessages() {
 	timer := time.NewTicker(time.Second / 30)
 	for range timer.C {
-		fmt.Println("TICK")
+		// fmt.Println("TICK")
 		ds := <-b.shipHighway
-		b.deliver(ds)
+		err := b.deliver(ds)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 }
 
