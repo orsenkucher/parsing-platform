@@ -172,7 +172,7 @@ type NewBasket struct {
 func (u *NewBasket) Update(s *Server) {
 	state := s.UsersStates[u.ChatID]
 	state.State = s.Tree
-	s.Bot.UpdateMsg(state.GenerateMsg())
+	s.Bot.ResendMsg(state.GenerateMsg())
 }
 
 func (s *Server) GetState(ChatID int64) *UsersState {
