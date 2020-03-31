@@ -133,12 +133,15 @@ func (u *HomeReq) Update(s *Server) {
 }
 
 type Reset struct {
-	ChatID int64
+	ChatID   int64
+	BasketID uint64
 }
 
 func (u *Reset) Update(s *Server) {
-	delete(s.UsersStates, u.ChatID)
-	//s.Bot.UpdateMsg(state.GenerateMsg())
+	state := s.GetState(u.ChatID)
+	delete(state.Baskets, u.BasketID)
+	state.State = s.Tree.Next["home"]
+	s.Bot.UpdateMsg(state.GenerateMsg())
 }
 
 type CheckUser struct {
