@@ -42,6 +42,9 @@ func (b *Bot) handleCallback(update tgbotapi.Update) {
 	if data[0] == "newbasket" {
 		b.Updates <- &NewBasket{ChatID: ChatID}
 	}
+	if data[0] == "sendbasket" {
+		b.Updates <- &SendBasket{ChatID: ChatID}
+	}
 	if data[0] == "catalog" {
 		b.Updates <- &CatalogReq{ChatID: ChatID}
 	}
