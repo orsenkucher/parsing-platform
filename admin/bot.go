@@ -13,7 +13,7 @@ type Writer interface {
 }
 
 type Editor interface {
-	EditMessages(...tgbotapi.EditMessageTextConfig)
+	EditMessages(...tgbotapi.MessageConfig)
 }
 
 type Binder interface {
@@ -28,14 +28,13 @@ type Sender interface {
 }
 
 type Bot struct {
-	api  *tgbotapi.BotAPI
-	cfg  encio.Config
-	updc chan tgbotapi.Update
-
-	shipMaster chan defferedShipment // main message channel
-	shipBackup chan defferedShipment // reserve channel
-	shipTime   map[int64]int64       // last sent time
-	shipLog    map[int64][]int       // sent history
+	api         *tgbotapi.BotAPI
+	cfg         encio.Config
+	updc        chan tgbotapi.Update            // TODO(multiple bindings)
+	shipGrid    map[int64]chan defferedShipment // 1 drip/sec on highway per user
+	shipHighway chan defferedShipment           // 30 shipments/sec
+	shipTime    map[int64]int64                 // last sent time
+	shipLog     map[int64][]int                 // sent history
 }
 
 type defferedShipment struct {
@@ -45,12 +44,12 @@ type defferedShipment struct {
 
 func NewBot(cfg encio.Config) *Bot {
 	bot := &Bot{
-		cfg:        cfg,
-		updc:       make(chan tgbotapi.Update),
-		shipLog:    make(map[int64][]int),
-		shipTime:   make(map[int64]int64),
-		shipMaster: make(chan defferedShipment, 1000),
-		shipBackup: make(chan defferedShipment, 1000),
+		cfg:         cfg,
+		updc:        make(chan tgbotapi.Update),
+		shipLog:     make(map[int64][]int),
+		shipTime:    make(map[int64]int64),
+		shipGrid:    make(map[int64]chan defferedShipment),
+		shipHighway: make(chan defferedShipment, 1000),
 	}
 	bot.init()
 	go bot.processMessages()
@@ -103,41 +102,82 @@ func (b *Bot) Bind(bindFn func(tgbotapi.UpdatesChannel)) {
 
 func (b *Bot) WriteMessages(mm ...tgbotapi.MessageConfig) {
 	for _, m := range mm {
-		b.shipMaster <- defferedShipment{chatID: m.ChatID, cargo: m}
+		ds := defferedShipment{chatID: m.ChatID, cargo: m}
+		b.shipToGrid(ds)
 	}
 }
 
-func (b *Bot) EditMessages(mm ...tgbotapi.EditMessageTextConfig) {
-	// for m := range mm {
-	// 	b.messagesMaster <- defferedShipment{chatID: m.ChatID, cargo: m}
+func (b *Bot) EditMessages(mm ...tgbotapi.MessageConfig) {
+	if len(mm) > 1 {
+		panic(">=2 messages - not supported now")
+	}
+
+	i := 0
+	m := mm[i]
+	// Заодно и пофиксит накопление лога
+	// var dss []defferedShipment
+	// for i, m := range mm {
+	cid := m.ChatID
+	prev := b.shipLog[cid][i]
+	em := tgbotapi.NewEditMessageText(cid, prev, m.Text)
+	em.ReplyMarkup = m.ReplyMarkup.(*tgbotapi.InlineKeyboardMarkup)
+	ds := defferedShipment{chatID: m.ChatID, cargo: em}
+	b.shipToGrid(ds)
+	// 	dss = append(dss, ds)
 	// }
-	panic("TODO")
+}
+
+func (b *Bot) shipToGrid(ds defferedShipment) {
+	c, ok := b.shipGrid[ds.chatID]
+	if !ok {
+		c = make(chan defferedShipment, 10)
+		b.shipGrid[ds.chatID] = c
+	}
+	if len(c) == 0 {
+		go func() {
+			timer := time.NewTicker(time.Second)
+			for range timer.C {
+				select {
+				case ds := <-c:
+					b.shipHighway <- ds
+				default:
+					// b.shipGrid[ds.chatID] = nil // THINK
+					// delete(b.shipGrid, ds.chatID)
+					return
+				}
+			}
+		}()
+	}
+	c <- ds
+}
+
+func (b *Bot) deliver(ds defferedShipment) error {
+	b.shipTime[ds.chatID] = time.Now().UnixNano()
+	m, err := b.api.Send(ds.cargo)
+	b.shipLog[ds.chatID] = append(b.shipLog[ds.chatID], m.MessageID)
+	return err
 }
 
 // TODO handle errors
-// This wont work
 func (b *Bot) processMessages() {
 	timer := time.NewTicker(time.Second / 30)
 	for range timer.C {
-		select {
-		case cargo := <-b.shipMaster:
-			if ok, delta := b.userCanReceiveMessage(cargo.chatID); !ok {
-				go func() {
-					time.Sleep(time.Duration(delta))
-					b.shipBackup <- cargo
-				}()
-			} else {
-				b.sendMessage(cargo)
-			}
-		case defferedCargo := <-b.shipBackup:
-			b.sendMessage(defferedCargo)
-		}
+		ds := <-b.shipHighway
+		b.deliver(ds)
+		// select {
+		// case cargo := <-b.shipMaster:
+		// 	if ok, delta := b.userCanReceiveMessage(cargo.chatID); !ok {
+		// 		go func() {
+		// 			time.Sleep(time.Duration(delta))
+		// 			b.shipBackup <- cargo
+		// 		}()
+		// 	} else {
+		// 		b.sendMessage(cargo)
+		// 	}
+		// case defferedCargo := <-b.shipBackup:
+		// 	b.sendMessage(defferedCargo)
+		// }
 	}
-}
-
-func (b *Bot) sendMessage(msg defferedShipment) (tgbotapi.Message, error) {
-	b.shipTime[msg.chatID] = time.Now().UnixNano()
-	return b.api.Send(msg.cargo)
 }
 
 // TODO do this better

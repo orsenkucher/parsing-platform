@@ -47,7 +47,7 @@ func (s *State) phone(upd tgbotapi.Update) StateFn {
 	msg := tgbotapi.NewMessage(chatID(upd), "Отлично")
 	btn := tgbotapi.NewRemoveKeyboard(false)
 	msg.ReplyMarkup = btn
-	s.sender.WriteMessages(msg, tgbotapi.NewMessage(chatID(upd), fmt.Sprint(cont)))
+	s.sender.EditMessages(msg, tgbotapi.NewMessage(chatID(upd), fmt.Sprint(cont)))
 	return s.start
 }
 
