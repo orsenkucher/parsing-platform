@@ -56,5 +56,5 @@ func (state *UsersState) ToString() string {
 }
 
 func (p *Purchase) ToString() string {
-	return p.Product.Product.Name + " " + strconv.Itoa(p.Count) + "\n"
+	return strconv.Itoa(p.Count) + p.Product.Product.Name + " " + "\n"
 }
