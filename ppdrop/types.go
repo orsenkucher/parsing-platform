@@ -35,6 +35,19 @@ const (
 	Ready
 )
 
+func (s *Status) ToString() string {
+	if *s == New {
+		return "Новый"
+	} else if *s == Sent {
+		return "Отправлен"
+	} else if *s == Received {
+		return "В очереди"
+	} else if *s == Processing {
+		return "Собирается"
+	}
+	return "Готово!"
+}
+
 type Basket struct {
 	Status    Status
 	Location  uint64
@@ -52,6 +65,9 @@ func (state *UsersState) ToString() string {
 		}
 	}
 	str += "Вартість: " + strconv.FormatFloat(basket.Sum, 'f', 2, 64) + "\n"
+	if basket.Status != New {
+		str += basket.Status.ToString() + "\n"
+	}
 	return str
 }
 
