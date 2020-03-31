@@ -104,10 +104,12 @@ func (s *State) showBasketToUser(chatID int64) StateFn {
 	)
 	msg.ReplyMarkup = btn
 	s.sender.EditMessages(msg)
+	fmt.Println("waiting confirm")
 	return s.confirm
 }
 
 func (s *State) confirm(upd tgbotapi.Update) StateFn {
+	fmt.Println("In confirm()")
 	if upd.CallbackQuery == nil {
 		return s.confirm
 	}
@@ -118,7 +120,9 @@ func (s *State) confirm(upd tgbotapi.Update) StateFn {
 	fmt.Println("CONFIRMED")
 	cid := chatID(upd)
 	fmt.Println(cid)
-	s.bask.callback(s.workers[cid])
+	if s.bask.callback != nil {
+		s.bask.callback(s.workers[cid])
+	}
 	return s.showBasketToUser(cid)
 }
 

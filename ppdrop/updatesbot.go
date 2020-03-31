@@ -191,6 +191,8 @@ func (u *SendBasket) Update(s *Server) {
 	s.Bot.UpdateMsg(state.GenerateMsg())
 	s.Admin.Basket(basket.ToString(), func(name string) {
 		fmt.Println("BASKET BY", name)
+		basket.Status = Processing
+		s.Admin.Basket(basket.ToString(), nil)
 		//TODO
 	})
 }
