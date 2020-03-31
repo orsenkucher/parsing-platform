@@ -159,5 +159,8 @@ func (state *UsersState) lowButtons() []tgbotapi.InlineKeyboardButton {
 	menu := tgbotapi.NewInlineKeyboardButtonData("📖", "catalog\n")
 	location := tgbotapi.NewInlineKeyboardButtonData("🏠", "agree\n")
 	basket := tgbotapi.NewInlineKeyboardButtonData("🧺 "+strconv.FormatFloat(state.Baskets[state.Current].Sum, 'f', 2, 64), "basket\n")
+	if state.State.Product.Name == "basket" {
+		basket = tgbotapi.NewInlineKeyboardButtonData("Отправить", "sendbasket\n")
+	}
 	return []tgbotapi.InlineKeyboardButton{menu, location, basket}
 }
