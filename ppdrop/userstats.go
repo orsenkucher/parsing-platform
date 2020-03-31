@@ -164,7 +164,7 @@ func (state *UsersState) productButtons(products []*ProdTree) [][]tgbotapi.Inlin
 					count = p.Count
 				}
 			}
-			countButton := tgbotapi.NewInlineKeyboardButtonData(strconv.Itoa(count)+"шт", "\n")
+			countButton := tgbotapi.NewInlineKeyboardButtonData(strconv.Itoa(count)+" шт", "\n")
 
 			rows = append(rows, []tgbotapi.InlineKeyboardButton{button})
 			rows = append(rows, []tgbotapi.InlineKeyboardButton{subButton, price, countButton, addButton})
