@@ -120,8 +120,8 @@ func (b *Bot) EditMessages(mm ...tgbotapi.MessageConfig) {
 	if len(log) > 0 {
 		prev := log[len(log)-1]
 		dm := tgbotapi.NewDeleteMessage(cid, prev)
-		b.shipToGrid(defferedShipment{chatID: m.ChatID, cargo: dm})
 		b.shipLog[cid] = log[:len(log)-1]
+		b.shipToGrid(defferedShipment{chatID: m.ChatID, cargo: dm})
 	}
 	b.shipToGrid(defferedShipment{chatID: m.ChatID, cargo: m})
 	// 	dss = append(dss, ds)

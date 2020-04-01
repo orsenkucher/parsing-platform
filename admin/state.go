@@ -123,7 +123,8 @@ func (s *State) confirm(upd tgbotapi.Update) StateFn {
 	if upd.CallbackQuery.Data != "confirm" {
 		return s.confirm
 	}
-	fmt.Println("CONFIRMED")
+	fmt.Println("\tCONFIRMED")
+	log.Println("\tCONFIRMED")
 	cid := chatID(upd)
 	fmt.Println(cid)
 	if s.bask.callback != nil {
