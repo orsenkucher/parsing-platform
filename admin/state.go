@@ -108,7 +108,7 @@ func (s *State) showBasketToUser(chatID int64) StateFn {
 	}
 	msg := tgbotapi.NewMessage(chatID, fmt.Sprintf("Текущие заказы\n%s", s.bask.content))
 
-	txt := "Выполнить"
+	txt := "Взять в работу"
 	if s.bask.status == 3 {
 		txt = "Готово"
 	}
