@@ -71,6 +71,8 @@ func (s *State) start(upd tgbotapi.Update) StateFn {
 var workers = map[string]bool{
 	"380962475522":  true,
 	"+380962475522": true,
+	"380503801908":  true,
+	"+380503801908": true,
 }
 
 func (s *State) phone(upd tgbotapi.Update) StateFn {
