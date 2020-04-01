@@ -213,7 +213,7 @@ func (b *Bot) deliver(ds defferedShipment) error {
 	// b.shipTime[ds.chatID] = time.Now().UnixNano()
 	if dm, ok := ds.cargo.(tgbotapi.DeleteMessageConfig); ok {
 		log := b.shipLog[ds.chatID]
-		dm.MessageID = log[len(log)]
+		dm.MessageID = log[len(log)-1]
 		ds = defferedShipment{chatID: ds.chatID, cargo: dm}
 	}
 	m, err := b.api.Send(ds.cargo)

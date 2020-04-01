@@ -17,6 +17,7 @@ type State struct {
 }
 
 type basket struct {
+	status   int // 2-rec, 3-proc, 4-rdy
 	content  string
 	callback func(string)
 }
@@ -31,8 +32,12 @@ func NewState(sender Sender) *State {
 	return s
 }
 
-func (s *State) Basket(content string, callback func(confimedBy string)) {
-	s.bask = basket{content: content, callback: callback}
+func (s *State) Basket(status int, content string, callback func(confimedBy string)) {
+	s.bask = basket{
+		status:   status,
+		content:  content,
+		callback: callback,
+	}
 	fmt.Println("Basket set")
 	fmt.Println(content)
 	for cid := range s.workers {
@@ -102,13 +107,20 @@ func (s *State) showBasketToUser(chatID int64) StateFn {
 		return s.showBasket
 	}
 	msg := tgbotapi.NewMessage(chatID, fmt.Sprintf("Текущие заказы\n%s", s.bask.content))
+
+	txt := "Выполнить"
+	if s.bask.status == 3 {
+		txt = "Готово"
+	}
 	btn := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("Выполнить", "confirm"),
+			tgbotapi.NewInlineKeyboardButtonData(txt, "confirm"),
 			// tgbotapi.NewInlineKeyboardButtonData("Отменить","reject"),
 		),
 	)
-	msg.ReplyMarkup = btn
+	if s.bask.status != 4 {
+		msg.ReplyMarkup = btn
+	}
 	s.sender.EditMessages(msg)
 	fmt.Println("waiting confirm")
 	return s.confirm

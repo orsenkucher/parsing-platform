@@ -189,10 +189,14 @@ func (u *SendBasket) Update(s *Server) {
 	state.State = s.Tree.Next["home"]
 	state.Current = 0
 	s.Bot.UpdateMsg(state.GenerateMsg())
-	s.Admin.Basket(basket.ToString(), func(name string) {
+	s.Admin.Basket(2, basket.ToString(), func(name string) {
 		fmt.Println("BASKET BY", name)
 		basket.Status = Processing
-		s.Admin.Basket(basket.ToString(), nil)
+		s.Admin.Basket(3, basket.ToString(), func(name string) {
+			fmt.Println("DONE BY", name)
+			basket.Status = Ready
+			s.Admin.Basket(4, basket.ToString(), nil)
+		})
 		//TODO
 	})
 }
