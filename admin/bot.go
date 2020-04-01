@@ -211,6 +211,11 @@ func (b *Bot) processMessages() {
 
 func (b *Bot) deliver(ds defferedShipment) error {
 	// b.shipTime[ds.chatID] = time.Now().UnixNano()
+	if dm, ok := ds.cargo.(tgbotapi.DeleteMessageConfig); ok {
+		log := b.shipLog[ds.chatID]
+		dm.MessageID = log[len(log)]
+		ds = defferedShipment{chatID: ds.chatID, cargo: dm}
+	}
 	m, err := b.api.Send(ds.cargo)
 	b.shipLog[ds.chatID] = append(b.shipLog[ds.chatID], m.MessageID)
 	return err
