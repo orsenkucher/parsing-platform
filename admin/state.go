@@ -91,8 +91,12 @@ func (s *State) phone(upd tgbotapi.Update) StateFn {
 		return s.start
 	}
 	log.Println("Woker connected!")
-	s.workers[chatID(upd)] = cont.FirstName
-	msg := tgbotapi.NewMessage(chatID(upd), fmt.Sprintf("%v🤟", cont.FirstName))
+	name := cont.FirstName
+	if name == "" {
+		name = cont.LastName
+	}
+	s.workers[chatID(upd)] = name
+	msg := tgbotapi.NewMessage(chatID(upd), fmt.Sprintf("%v🤟", name))
 	msg.ReplyMarkup = btn
 	s.sender.EditMessages(msg)
 	return s.showBasket(upd)
