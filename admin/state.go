@@ -85,14 +85,14 @@ func (s *State) phone(upd tgbotapi.Update) StateFn {
 		log.Println("Worker not registered")
 		msg := tgbotapi.NewMessage(chatID(upd), "Вы тут не работаете🤨.\nНо очень советуем заглянуть в @ppdropbot😉")
 		msg.ReplyMarkup = btn
-		s.sender.WriteMessages(msg)
+		s.sender.EditMessages(msg)
 		return s.start
 	}
 	log.Println("Woker connected!")
 	s.workers[chatID(upd)] = cont.FirstName
 	msg := tgbotapi.NewMessage(chatID(upd), fmt.Sprintf("%v🤟", cont.FirstName))
 	msg.ReplyMarkup = btn
-	s.sender.WriteMessages(msg)
+	s.sender.EditMessages(msg)
 	return s.showBasket(upd)
 }
 
