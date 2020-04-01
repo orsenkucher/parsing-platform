@@ -28,7 +28,7 @@ func (u *NewLocation) Update(s *Server) {
 		}
 		state.Current = u.Location
 		state.State = s.Tree.Next[locstr]
-		s.Bot.UpdateMsg(state.GenerateMsg())
+		s.Bot.ResendMsg(state.GenerateMsg())
 	}
 	//s.Bot.SendMessage(u.ChatID, u.Location+"\n"+s.Queries[u.ChatID].ToString())
 }
@@ -192,9 +192,11 @@ func (u *SendBasket) Update(s *Server) {
 	s.Admin.Basket(2, basket.ToString(), func(name string) {
 		fmt.Println("BASKET BY", name)
 		basket.Status = Processing
+		s.Updates <- &NewLocation{Location: basket.Location, ChatID: u.ChatID}
 		s.Admin.Basket(3, basket.ToString(), func(name string) {
 			fmt.Println("DONE BY", name)
 			basket.Status = Ready
+			s.Updates <- &NewLocation{Location: basket.Location, ChatID: u.ChatID}
 			s.Admin.Basket(4, basket.ToString(), nil)
 		})
 		//TODO
