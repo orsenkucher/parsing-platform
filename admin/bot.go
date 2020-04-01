@@ -111,15 +111,18 @@ func (b *Bot) EditMessages(mm ...tgbotapi.MessageConfig) {
 	// Заодно и пофиксит накопление лога
 	// var dss []defferedShipment
 	// for i, m := range mm {
-	cid := m.ChatID
-	log := b.shipLog[cid]
-	prev := log[len(log)-1]
 	// em := tgbotapi.NewEditMessageText(cid, prev, m.Text)
 	// if m.ReplyMarkup != nil {
 	// 	em.ReplyMarkup = m.ReplyMarkup.(*tgbotapi.InlineKeyboardMarkup)
 	// }
-	dm := tgbotapi.NewDeleteMessage(cid, prev)
-	b.shipToGrid(defferedShipment{chatID: m.ChatID, cargo: dm})
+	cid := m.ChatID
+	log := b.shipLog[cid]
+	if len(log) > 0 {
+		prev := log[len(log)-1]
+		dm := tgbotapi.NewDeleteMessage(cid, prev)
+		b.shipToGrid(defferedShipment{chatID: m.ChatID, cargo: dm})
+		b.shipLog[cid] = log[:len(log)-1]
+	}
 	b.shipToGrid(defferedShipment{chatID: m.ChatID, cargo: m})
 	// 	dss = append(dss, ds)
 	// }

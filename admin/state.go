@@ -13,6 +13,7 @@ type State struct {
 	sender  Sender
 	workers map[int64]string
 	bask    basket
+	sfn     map[int64]StateFn
 }
 
 type basket struct {
@@ -24,6 +25,7 @@ func NewState(sender Sender) *State {
 	s := &State{
 		sender:  sender,
 		workers: make(map[int64]string),
+		sfn:     make(map[int64]StateFn),
 	}
 	go sender.Bind(s.bind)
 	return s
@@ -34,14 +36,18 @@ func (s *State) Basket(content string, callback func(confimedBy string)) {
 	fmt.Println("Basket set")
 	fmt.Println(content)
 	for cid := range s.workers {
-		s.showBasketToUser(cid)
+		s.sfn[cid] = s.showBasketToUser(cid)
 	}
 }
 
 func (s *State) bind(upds tgbotapi.UpdatesChannel) {
-	state := s.start
 	for upd := range upds {
-		state = state(upd)
+		cid := chatID(upd)
+		state, ok := s.sfn[cid]
+		if !ok {
+			state = s.start
+		}
+		s.sfn[cid] = state(upd)
 	}
 }
 
